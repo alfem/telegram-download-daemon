@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+  telegram-download-deamon:
+    build: .
+    image: telegram-download-deamon:latest
+    environment:
+      TELEGRAM_DEAMON_API_ID: "YOUR API ID HERE"
+      TELEGRAM_DEAMON_API_HASH: "YOUR API HASH HERE"
+      TELEGRAM_DEAMON_CHANNEL: "YOUR CHANNEL ID HERE"
+      TELEGRAM_DEAMON_DEST: "/downloads"
+    volumes:
+       - downloads:/downloads
+    restart: unless-stopped
+
+volumes:
+    downloads:
