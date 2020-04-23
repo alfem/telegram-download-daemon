@@ -20,21 +20,17 @@ Install cryptg to use a C library to speed up downloads (optional)
 
 Obtain your own api id: https://core.telegram.org/api/obtaining_api_id
 
-Edit telegram-download-daemon.py and put your own api_id and api_hash values
-into the proper variables.
+# Usage
 
-Change the destination folder if desired.
+You need to configure these values:
 
-Use your favorite Telegram app to create a new (private)channel. 
+| Environment Variable     | Command Line argument | Description                                                  | Default Value       |
+|--------------------------|:-----------------------:|--------------------------------------------------------------|---------------------|
+| `TELEGRAM_DEAMON_API_ID`   | `--api-id`              | api_id from https://core.telegram.org/api/obtaining_api_id   |                     |
+| `TELEGRAM_DEAMON_API_HASH` | `--api-hash`            | api_hash from https://core.telegram.org/api/obtaining_api_id |                     |
+| `TELEGRAM_DEAMON_CHANNEL`  | `--dest`                | Destenation path for downloading files                       | `/telegram-downloads` |
+| `TELEGRAM_DEAMON_DEST`     | `--channel`             | Channel id to download from it                               |                     |
 
-Change the channel_id in telegram-download-daemon.py.
+You can define the as Environment Variables, or put them as a commend line arguments, for example:
 
-Run the script!
-
-
-
-
-
-
-
-
+    python telegram-download-deamon.py --api-ip <your-id> --api-hash <your-hash> --channel <channel-number>
