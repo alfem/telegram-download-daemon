@@ -22,24 +22,7 @@ Install cryptg to use a C library to speed up downloads (optional)
 
 Obtain your own api id: https://core.telegram.org/api/obtaining_api_id
 
-<<<<<<< HEAD
 # Usage
-=======
-Edit telegram-download-daemon.py and put your own api_id and api_hash values
-into the proper variables.
-
-Change the destination folder if desired.
-
-Use your favorite Telegram app to create a new (private) channel. 
-
-Change the channel_id in telegram-download-daemon.py.
-
-Run the script!
-
-
-
-
->>>>>>> e9244216def3c26de7acb3e2599205fffd9a42f4
 
 You need to configure these values:
 
