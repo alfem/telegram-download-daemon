@@ -9,9 +9,12 @@ services:
       TELEGRAM_DEAMON_API_HASH: "YOUR API HASH HERE"
       TELEGRAM_DEAMON_CHANNEL: "YOUR CHANNEL ID HERE"
       TELEGRAM_DEAMON_DEST: "/downloads"
+      TELEGRAM_DEAMON_SESSION_PATH: "/session"
     volumes:
        - downloads:/downloads
+       - sessions:/session
     restart: unless-stopped
 
 volumes:
     downloads:
+    sessions:

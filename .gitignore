@@ -1,2 +1,7 @@
 .vscode
 .venv
+.env
+
+*.session
+
+__pycache__

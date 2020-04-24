@@ -35,3 +35,23 @@ You need to configure these values:
 You can define the as Environment Variables, or put them as a commend line arguments, for example:
 
     python telegram-download-deamon.py --api-ip <your-id> --api-hash <your-hash> --channel <channel-number>
+
+# Docker
+
+Using 
+
+When we use the [`TelegramClient`](https://docs.telethon.dev/en/latest/quick-references/client-reference.html#telegramclient) method, it requires us to interact with the `Console` to give it our phone number and confirm with a security code.
+
+To do this, when using *Docker*, you need to **interactively** run the container for the first time.
+
+When you use `docker-compose`, the `.session` file, where the login is stored is kept in *Volume* outside the container. Therefore, when using docker-compose you are required to:
+
+```bash
+$ docker-compose run --rm telegram-download-deamon
+# Interact with the console to authenticate yourself.
+# See the message "Signed in successfully as {youe name}"
+# Close the container
+$ docker-compose up -d
+```
+
+See the `sessions` volume in the [docker-compose.yml](docker-compose.yml) file.
