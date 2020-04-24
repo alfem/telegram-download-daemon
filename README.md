@@ -12,13 +12,12 @@ or daemon to allow bigger downloads (limited to 1.5GB by Telegram APIs).
 
 You need Python3 (tested in 3.5).
 
-Install Telethon module (using pip or your OS package system):
-	
-	pip install --user telethon
+Install dependencies by running this command:
 
-Install cryptg to use a C library to speed up downloads (optional)
-	
-	pip install --user cryptg
+    pip install -r requirements.txt
+
+(If you don't want to install `cryptg` and its dependencies, you just need to install `telethon`)
+
 
 Obtain your own api id: https://core.telegram.org/api/obtaining_api_id
 
