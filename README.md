@@ -38,8 +38,6 @@ You can define the as Environment Variables, or put them as a commend line argum
 
 # Docker
 
-Using 
-
 When we use the [`TelegramClient`](https://docs.telethon.dev/en/latest/quick-references/client-reference.html#telegramclient) method, it requires us to interact with the `Console` to give it our phone number and confirm with a security code.
 
 To do this, when using *Docker*, you need to **interactively** run the container for the first time.
