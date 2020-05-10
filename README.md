@@ -27,14 +27,14 @@ You need to configure these values:
 
 | Environment Variable     | Command Line argument | Description                                                  | Default Value       |
 |--------------------------|:-----------------------:|--------------------------------------------------------------|---------------------|
-| `TELEGRAM_DEAMON_API_ID`   | `--api-id`              | api_id from https://core.telegram.org/api/obtaining_api_id   |                     |
-| `TELEGRAM_DEAMON_API_HASH` | `--api-hash`            | api_hash from https://core.telegram.org/api/obtaining_api_id |                     |
-| `TELEGRAM_DEAMON_CHANNEL`  | `--dest`                | Destenation path for downloading files                       | `/telegram-downloads` |
-| `TELEGRAM_DEAMON_DEST`     | `--channel`             | Channel id to download from it                               |                     |
+| `TELEGRAM_DAEMON_API_ID`   | `--api-id`              | api_id from https://core.telegram.org/api/obtaining_api_id   |                     |
+| `TELEGRAM_DAEMON_API_HASH` | `--api-hash`            | api_hash from https://core.telegram.org/api/obtaining_api_id |                     |
+| `TELEGRAM_DAEMON_CHANNEL`  | `--dest`                | Destenation path for downloading files                       | `/telegram-downloads` |
+| `TELEGRAM_DAEMON_DEST`     | `--channel`             | Channel id to download from it                               |                     |
 
 You can define the as Environment Variables, or put them as a commend line arguments, for example:
 
-    python telegram-download-deamon.py --api-ip <your-id> --api-hash <your-hash> --channel <channel-number>
+    python telegram-download-daemon.py --api-ip <your-id> --api-hash <your-hash> --channel <channel-number>
 
 # Docker
 
@@ -45,7 +45,7 @@ To do this, when using *Docker*, you need to **interactively** run the container
 When you use `docker-compose`, the `.session` file, where the login is stored is kept in *Volume* outside the container. Therefore, when using docker-compose you are required to:
 
 ```bash
-$ docker-compose run --rm telegram-download-deamon
+$ docker-compose run --rm telegram-download-daemon
 # Interact with the console to authenticate yourself.
 # See the message "Signed in successfully as {youe name}"
 # Close the container
