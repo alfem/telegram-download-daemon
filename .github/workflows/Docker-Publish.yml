@@ -47,7 +47,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ${{ secrets.DOCKER_USERNAME }}/${{ IMAGE_NAME }}
+          repository: ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME
           tags: latest
   
   
