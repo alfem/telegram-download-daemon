@@ -35,11 +35,29 @@ jobs:
             docker build . --file Dockerfile
           fi
 
+  pushDockerHub:
+    runs-on: ubuntu-latest
+    name: Push to Docker Hub
+    needs: [test]
+    if: github.event_name == 'push'
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: ${{ github.actor }}/telegram-download-daemon
+          tags: latest
+  
+  
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
-  push:
+  pushGitHub:
+    name: Push to Github Registry
     # Ensure test job passes before pushing image.
-    needs: test
+    needs: [test]
 
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
