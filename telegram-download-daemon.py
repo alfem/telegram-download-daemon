@@ -69,7 +69,7 @@ proxy = None
 # End of interesting parameters
 async def sendHelloMessage(client, peerChannel):
     entity = await client.get_entity(peerChannel)
-    await client.send_message(entity, "Hi! Ready for you files!")
+    await client.send_message(entity, "Hi! Ready for your files!")
 
 
 async def log_reply(event : events.ChatAction.Event, reply):
