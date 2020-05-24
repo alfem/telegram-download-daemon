@@ -1,0 +1,20 @@
+version: '3.5'
+
+services:
+  telegram-download-daemon:
+    build: .
+    image: telegram-download-daemon:latest
+    environment:
+      TELEGRAM_DAEMON_API_ID: "YOUR API ID HERE"
+      TELEGRAM_DAEMON_API_HASH: "YOUR API HASH HERE"
+      TELEGRAM_DAEMON_CHANNEL: "YOUR CHANNEL ID HERE"
+      TELEGRAM_DAEMON_DEST: "/downloads"
+      TELEGRAM_DAEMON_SESSION_PATH: "/session"
+    volumes:
+       - downloads:/downloads
+       - sessions:/session
+    restart: unless-stopped
+
+volumes:
+    downloads:
+    sessions:
