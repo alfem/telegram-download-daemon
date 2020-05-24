@@ -72,9 +72,9 @@ async def sendHelloMessage(client, peerChannel):
     await client.send_message(entity, "Hi! Ready for you files!")
 
 
-async def log_respond(event, respond):
-    print(respond)
-    await event.respond(respond)
+async def log_reply(event : events.ChatAction.Event, reply):
+    print(reply)
+    await event.reply(reply)
 
 
 with TelegramClient(getSession(), api_id, api_hash,
@@ -93,15 +93,15 @@ with TelegramClient(getSession(), api_id, api_hash,
         print(event)
 
         if event.media:
-            filename = event.media.document.attributes[0].file_name
-            await log_respond(
+            filename=event.media.document.attributes[0].file_name
+            await log_reply(
                 event,
                 f"Downloading file {filename} ({event.media.document.size} bytes)"
             )
 
             await client.download_media(event.message, downloadFolder)
-            await log_respond(event, f"{filename} ready")
-
+            await log_reply(event, f"{filename} ready")
+    
     async def start():
         await sendHelloMessage(client, peerChannel)
         await client.run_until_disconnected()
