@@ -40,9 +40,9 @@ client = TelegramClient(session, api_id, api_hash, proxy=proxy).start()
 @client.on(events.NewMessage())
 async def handler(event):
     
-    async def log_respond(respond):
-        print(respond)
-        await event.respond(respond)
+    async def log_reply(reply):
+        print(reply)
+        await event.reply(reply)
 
     if event.to_id != PeerChannel(channel_id):
         return
@@ -51,10 +51,10 @@ async def handler(event):
     
     if event.media:
        filename=event.media.document.attributes[0].file_name
-       log_respond(f"Downloading file {filename} ({event.media.document.size} bytes)")
+       log_reply(f"Downloading file {filename} ({event.media.document.size} bytes)")
 
        await client.download_media(event.message, downloadFolder)
-       log_respond(f"{filename} ready")
+       log_reply(f"{filename} ready")
 
 
 with client:
