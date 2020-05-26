@@ -96,6 +96,8 @@ with TelegramClient(getSession(), api_id, api_hash,
         print(event)
 
         if event.media:
+            filename=event.media.document.attributes[0].file_name
+            await log_reply(event, f"{filename} added to queue")
             queue.put_nowait(event)
 
     async def worker():
