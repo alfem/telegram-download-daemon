@@ -14,6 +14,7 @@ import logging
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s]%(name)s:%(message)s',
                     level=logging.WARNING)
 
+import multiprocessing
 import argparse
 import asyncio
 
@@ -61,6 +62,7 @@ api_id = args.api_id
 api_hash = args.api_hash
 channel_id = args.channel
 downloadFolder = args.dest
+worker_count = multiprocessing.cpu_count()
 
 # Edit these lines:
 proxy = None
@@ -86,6 +88,7 @@ with TelegramClient(getSession(), api_id, api_hash,
 
     saveSession(client.session)
 
+    queue = asyncio.Queue()
     peerChannel = PeerChannel(channel_id)
 
     @client.on(events.NewMessage())
@@ -98,6 +101,15 @@ with TelegramClient(getSession(), api_id, api_hash,
 
         if event.media:
             filename=getFilename(event)
+            await log_reply(event, f"{filename} added to queue")
+            queue.put_nowait(event)
+
+    async def worker():
+        while True:
+            event = await queue.get()
+
+            filename=getFilename(event)
+
             await log_reply(
                 event,
                 f"Downloading file {filename} ({event.media.document.size} bytes)"
@@ -105,9 +117,18 @@ with TelegramClient(getSession(), api_id, api_hash,
 
             await client.download_media(event.message, downloadFolder)
             await log_reply(event, f"{filename} ready")
-    
+
+            queue.task_done()
+
     async def start():
+        tasks = []
+        for i in range(worker_count):
+            task = asyncio.create_task(worker())
+            tasks.append(task)
         await sendHelloMessage(client, peerChannel)
         await client.run_until_disconnected()
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     client.loop.run_until_complete(start())
