@@ -8,7 +8,7 @@ from os import getenv
 from sessionManager import getSession, saveSession
 
 from telethon import TelegramClient, events
-from telethon.tl.types import PeerChannel
+from telethon.tl.types import PeerChannel, DocumentAttributeFilename
 import logging
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s]%(name)s:%(message)s',
@@ -71,12 +71,16 @@ proxy = None
 # End of interesting parameters
 async def sendHelloMessage(client, peerChannel):
     entity = await client.get_entity(peerChannel)
+    print("Hi! Ready for your files!")
     await client.send_message(entity, "Hi! Ready for your files!")
-
+ 
 
 async def log_reply(event : events.ChatAction.Event, reply):
     print(reply)
     await event.reply(reply)
+
+def getFilename(event: events.NewMessage.Event):
+    return next(x for x in event.media.document.attributes if isinstance(x, DocumentAttributeFilename)).file_name
 
 
 with TelegramClient(getSession(), api_id, api_hash,
@@ -96,7 +100,7 @@ with TelegramClient(getSession(), api_id, api_hash,
         print(event)
 
         if event.media:
-            filename=event.media.document.attributes[0].file_name
+            filename=getFilename(event)
             await log_reply(event, f"{filename} added to queue")
             queue.put_nowait(event)
 
@@ -104,7 +108,8 @@ with TelegramClient(getSession(), api_id, api_hash,
         while True:
             event = await queue.get()
 
-            filename=event.media.document.attributes[0].file_name
+            filename=getFilename(event)
+
             await log_reply(
                 event,
                 f"Downloading file {filename} ({event.media.document.size} bytes)"
