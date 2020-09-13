@@ -34,7 +34,7 @@ You need to configure these values:
 
 You can define the as Environment Variables, or put them as a commend line arguments, for example:
 
-    python telegram-download-daemon.py --api-ip <your-id> --api-hash <your-hash> --channel <channel-number>
+    python telegram-download-daemon.py --api-id <your-id> --api-hash <your-hash> --channel <channel-number>
 
 # Docker
 
