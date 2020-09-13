@@ -36,6 +36,15 @@ You can define the as Environment Variables, or put them as a commend line argum
 
     python telegram-download-daemon.py --api-id <your-id> --api-hash <your-hash> --channel <channel-number>
 
+
+Note: You can either authenticate with phone or with bot_token.
+I wanted to start this daemon from raspberry startup without no interaction and to do that I used the bot token.
+
+to do so change this lines:
+
+    #with TelegramClient(getSession(), api_id, api_hash,proxy=proxy).start() as client:
+    with TelegramClient(getSession(), api_id, api_hash,proxy=proxy).start(bot_token='<yourBotToken>') as client:
+
 # Docker
 
 `docker pull alfem/telegram-download-daemon`

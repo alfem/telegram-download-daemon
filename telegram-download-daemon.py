@@ -84,11 +84,8 @@ def getFilename(event: events.NewMessage.Event):
         if isinstance(x, DocumentAttributeFilename): return x.file_name
         if isinstance(x, DocumentAttributeVideo): return "DocumentAttributeVideo"
 
-    return next(x for x in event.media.document.attributes if isinstance(x, DocumentAttributeFilename))
-
-
-with TelegramClient(getSession(), api_id, api_hash,
-                    proxy=proxy).start() as client:
+with TelegramClient(getSession(), api_id, api_hash,proxy=proxy).start() as client:
+#with TelegramClient(getSession(), api_id, api_hash,proxy=proxy).start(bot_token='<yourBotToken>') as client:
 
     saveSession(client.session)
 
