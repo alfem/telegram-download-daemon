@@ -8,7 +8,7 @@ from os import getenv
 from sessionManager import getSession, saveSession
 
 from telethon import TelegramClient, events
-from telethon.tl.types import PeerChannel, DocumentAttributeFilename
+from telethon.tl.types import PeerChannel, DocumentAttributeFilename,DocumentAttributeVideo
 import logging
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s]%(name)s:%(message)s',
@@ -80,7 +80,11 @@ async def log_reply(event : events.ChatAction.Event, reply):
     await event.reply(reply)
 
 def getFilename(event: events.NewMessage.Event):
-    return next(x for x in event.media.document.attributes if isinstance(x, DocumentAttributeFilename)).file_name
+    for x in event.media.document.attributes:
+        if isinstance(x, DocumentAttributeFilename): return x.file_name
+        if isinstance(x, DocumentAttributeVideo): return "DocumentAttributeVideo"
+
+    return next(x for x in event.media.document.attributes if isinstance(x, DocumentAttributeFilename))
 
 
 with TelegramClient(getSession(), api_id, api_hash,
