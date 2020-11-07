@@ -122,8 +122,9 @@ with TelegramClient(getSession(), api_id, api_hash,
 
     async def start():
         tasks = []
+        loop = asyncio.get_event_loop()
         for i in range(worker_count):
-            task = asyncio.create_task(worker())
+            task = loop.create_task(worker())
             tasks.append(task)
         await sendHelloMessage(client, peerChannel)
         await client.run_until_disconnected()
