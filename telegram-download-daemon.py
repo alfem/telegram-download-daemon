@@ -4,6 +4,7 @@
 # You need to install telethon (and cryptg to speed up downloads)
 
 from os import getenv
+import subprocess
 
 from sessionManager import getSession, saveSession
 
@@ -100,6 +101,14 @@ with TelegramClient(getSession(), api_id, api_hash,
             return
 
         print(event)
+
+        if not event.media and event.message:
+            command = event.message.message
+            command = command.lower()
+            if command == "list":
+                output = subprocess.run(["ls", "-l", downloadFolder], capture_output=True).stdout
+                output = output.decode('utf-8')
+                await log_reply(event, output)
 
         if event.media:
             filename=getFilename(event)
