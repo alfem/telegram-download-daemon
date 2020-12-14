@@ -32,7 +32,7 @@ You need to configure these values:
 | `TELEGRAM_DAEMON_DEST`     | `--dest`                | Destenation path for downloading files                       | `/telegram-downloads` |
 | `TELEGRAM_DAEMON_CHANNEL`  | `--channel`             | Channel id to download from it                               |                     |
 
-You can define the as Environment Variables, or put them as a commend line arguments, for example:
+You can define them as Environment Variables, or put them as a command line arguments, for example:
 
     python telegram-download-daemon.py --api-id <your-id> --api-hash <your-hash> --channel <channel-number>
 
