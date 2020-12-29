@@ -3,7 +3,7 @@
 # Author: Alfonso E.M. <alfonso@el-magnifico.org>
 # You need to install telethon (and cryptg to speed up downloads)
 
-from os import getenv
+from os import getenv, rename
 import subprocess
 
 from sessionManager import getSession, saveSession
@@ -126,7 +126,8 @@ with TelegramClient(getSession(), api_id, api_hash,
                 f"Downloading file {filename} ({event.media.document.size} bytes)"
             )
 
-            await client.download_media(event.message, downloadFolder)
+            await client.download_media(event.message, f"{downloadFolder}/{filename}.partial")
+            rename(f"{downloadFolder}/{filename}.partial", f"{downloadFolder}/{filename}")
             await log_reply(event, f"{filename} ready")
 
             queue.task_done()
