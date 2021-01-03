@@ -5,6 +5,7 @@
 
 from os import getenv, rename
 import subprocess
+import math
 
 from sessionManager import getSession, saveSession
 
@@ -86,6 +87,17 @@ def getFilename(event: events.NewMessage.Event):
         if isinstance(attribute, DocumentAttributeVideo): return "DocumentAttributeVideo"
 
 
+in_progress={}
+
+def set_progress(filename, received, total):
+    if received >= total:
+        try: in_progress.pop(filename)
+        except: pass
+        return
+    percentage = math.trunc(received / total * 10000) / 100;
+
+    in_progress[filename] = f"{percentage} % ({received} / {total})"
+
 with TelegramClient(getSession(), api_id, api_hash,
                     proxy=proxy).start() as client:
 
@@ -105,10 +117,21 @@ with TelegramClient(getSession(), api_id, api_hash,
         if not event.media and event.message:
             command = event.message.message
             command = command.lower()
+            output = "Unknown command"
+
             if command == "list":
                 output = subprocess.run(["ls", "-l", downloadFolder], capture_output=True).stdout
                 output = output.decode('utf-8')
-                await log_reply(event, output)
+
+            if command == "status":
+                try:
+                    output = "".join([ f"{key}: {value}\n" for (key, value) in in_progress.items()])
+                    if output: output = "Active downloads:\n\n" + output
+                    else: output = "No active downloads"
+                except:
+                    output = "Some error occured while checking the status. Retry."
+
+            await log_reply(event, output)
 
         if event.media:
             filename=getFilename(event)
@@ -126,7 +149,10 @@ with TelegramClient(getSession(), api_id, api_hash,
                 f"Downloading file {filename} ({event.media.document.size} bytes)"
             )
 
-            await client.download_media(event.message, f"{downloadFolder}/{filename}.partial")
+            download_callback = lambda received, total: set_progress(filename, received, total)
+
+            await client.download_media(event.message, f"{downloadFolder}/{filename}.partial", progress_callback = download_callback)
+            set_progress(filename, 1, 1)
             rename(f"{downloadFolder}/{filename}.partial", f"{downloadFolder}/{filename}")
             await log_reply(event, f"{filename} ready")
 
