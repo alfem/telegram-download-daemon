@@ -84,7 +84,7 @@ async def log_reply(event : events.ChatAction.Event, reply):
 def getFilename(event: events.NewMessage.Event):
     for attribute in event.media.document.attributes:
         if isinstance(attribute, DocumentAttributeFilename): return attribute.file_name
-        if isinstance(attribute, DocumentAttributeVideo): return "DocumentAttributeVideo"
+        if isinstance(attribute, DocumentAttributeVideo): return event.original_update.message.message
 
 
 in_progress={}
