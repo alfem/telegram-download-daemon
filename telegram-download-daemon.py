@@ -148,7 +148,7 @@ with TelegramClient(getSession(), api_id, api_hash,
                 if len(command) > 1:
                     params = command[1].split(' ')
                     if(params[0] == "help"):
-                        output = "HELP\n type /help rename [ON/OFF]"
+                        output = "HELP\n type /config rename [ON/OFF]"
                     if len(params)>1:
                         if(params[0] == "rename"):
                             if params[1] == "on":

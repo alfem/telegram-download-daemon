@@ -41,8 +41,9 @@ Finally, resend any file link to the channel to start the downloading. This daem
 
 You can also 'talk' to this daemon using your Telegram client:
 
-* Say "list" and get a list of available files in the destination path.
-* Say "status" to the daemon yo check the current status.
+* Say "/list" and get a list of available files in the destination path.
+* Say "/status" to the daemon yo check the current status.
+* Say "/config help" to see config parameters.
 
 
 
