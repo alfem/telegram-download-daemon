@@ -75,7 +75,7 @@ async def sendHelloMessage(client, peerChannel):
     entity = await client.get_entity(peerChannel)
     print("Hi! Ready for your files!")
     await client.send_message(entity, "Hi! Ready for your files!")
- 
+    
 
 async def log_reply(event : events.ChatAction.Event, reply):
     print(reply)
@@ -84,7 +84,10 @@ async def log_reply(event : events.ChatAction.Event, reply):
 def getFilename(event: events.NewMessage.Event):
     for attribute in event.media.document.attributes:
         if isinstance(attribute, DocumentAttributeFilename): return attribute.file_name
-        if isinstance(attribute, DocumentAttributeVideo): return event.original_update.message.message
+        if isinstance(attribute, DocumentAttributeVideo): 
+            try: return event.message.document.attributes[1].file_name #sometimes there is the filename
+            except: return "DocumentAttributeVideo"
+       
 
 
 in_progress={}
@@ -94,7 +97,7 @@ def set_progress(filename, received, total):
         try: in_progress.pop(filename)
         except: pass
         return
-    percentage = math.trunc(received / total * 10000) / 100;
+    percentage = math.trunc(received / total * 10000) / 100
 
     in_progress[filename] = f"{percentage} % ({received} / {total})"
 
@@ -104,7 +107,9 @@ with TelegramClient(getSession(), api_id, api_hash,
     saveSession(client.session)
 
     queue = asyncio.Queue()
+    que_fname = asyncio.Queue()
     peerChannel = PeerChannel(channel_id)
+    config_rename = False
 
     @client.on(events.NewMessage())
     async def handler(event):
@@ -113,36 +118,69 @@ with TelegramClient(getSession(), api_id, api_hash,
             return
 
         print(event)
-
+        global config_rename
         if not event.media and event.message:
             command = event.message.message
             command = command.lower()
-            output = "Unknown command"
+            command = command.split(' ',1) #splitting for future command params
 
-            if command == "list":
+
+            if command[0] == "/start":
+                que_fname.put_nowait(command[1])
+                
+
+            if command[0] == "/list":
                 output = subprocess.run(["ls", "-l", downloadFolder], capture_output=True).stdout
                 output = output.decode('utf-8')
+                await log_reply(event, output)
 
-            if command == "status":
+            if command[0] == "/status":
                 try:
                     output = "".join([ f"{key}: {value}\n" for (key, value) in in_progress.items()])
                     if output: output = "Active downloads:\n\n" + output
                     else: output = "No active downloads"
                 except:
                     output = "Some error occured while checking the status. Retry."
-
-            await log_reply(event, output)
+                await log_reply(event, output)
+            
+            if command[0] == "/config":
+                output = "Wrong prarameter:\n type \'/config help\' "
+                if len(command) > 1:
+                    params = command[1].split(' ')
+                    if(params[0] == "help"):
+                        output = "HELP\n type /help rename [ON/OFF]"
+                    if len(params)>1:
+                        if(params[0] == "rename"):
+                            if params[1] == "on":
+                                config_rename = True
+                                output = "Manual renaming files : ON"
+                            if params[1] == "off":    
+                                config_rename = False
+                                output = "Manual renaming files : OFF"
+                        else:
+                            output = "Wrong prarameter:\n type \'/config help\' "
+                else:
+                    output = "Wrong prarameter:\n type \'/config help\' "
+                #output = "Wrong prarameter:\n type \'/config help\' "
+                await log_reply(event, output)
 
         if event.media:
-            filename=getFilename(event)
-            await log_reply(event, f"{filename} added to queue")
+            entity = await client.get_entity(peerChannel)
+            videoname = getFilename(event)
+            if config_rename == True | (videoname == 'DocumentAttributeVideo'):
+                await client.send_message(entity, "Enter /start [Filename] to start your download")
+            else:
+                que_fname.put_nowait(videoname)
             queue.put_nowait(event)
+
+
+    
 
     async def worker():
         while True:
             event = await queue.get()
-
-            filename=getFilename(event)
+            filename=await que_fname.get() # waiting for the filename
+            que_fname.task_done()
 
             await log_reply(
                 event,

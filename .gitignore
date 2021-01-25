@@ -5,3 +5,6 @@
 *.session
 
 __pycache__
+.DS_Store
+downloads
+*.session-journal
