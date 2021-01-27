@@ -29,7 +29,7 @@ TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
 TELEGRAM_DAEMON_DEST=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
 TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
 
-TELEGRAM_DAEMON_TEMP_SUFFIX=".tdd"
+TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
 parser = argparse.ArgumentParser(
     description="Script to download files from Telegram Channel.")
@@ -75,6 +75,7 @@ api_id = args.api_id
 api_hash = args.api_hash
 channel_id = args.channel
 downloadFolder = args.dest
+tempFolder = args.temp
 worker_count = multiprocessing.cpu_count()
 
 # Edit these lines:
@@ -162,9 +163,9 @@ with TelegramClient(getSession(), api_id, api_hash,
 
             download_callback = lambda received, total: set_progress(filename, received, total)
 
-            await client.download_media(event.message, f"{downloadFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", progress_callback = download_callback)
+            await client.download_media(event.message, f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", progress_callback = download_callback)
             set_progress(filename, 1, 1)
-            rename(f"{downloadFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", f"{downloadFolder}/{filename}")
+            rename(f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", f"{downloadFolder}/{filename}")
             await log_reply(event, f"{filename} ready")
 
             queue.task_done()
