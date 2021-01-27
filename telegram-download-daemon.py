@@ -26,6 +26,11 @@ TELEGRAM_DAEMON_CHANNEL = getenv("TELEGRAM_DAEMON_CHANNEL")
 
 TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
 
+TELEGRAM_DAEMON_DEST=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
+TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
+
+TELEGRAM_DAEMON_TEMP_SUFFIX=".tdd"
+
 parser = argparse.ArgumentParser(
     description="Script to download files from Telegram Channel.")
 parser.add_argument(
@@ -47,9 +52,15 @@ parser.add_argument(
 parser.add_argument(
     "--dest",
     type=str,
-    default=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads"),
+    default=TELEGRAM_DAEMON_DEST,
     help=
-    'Destenation path for downloading files (default is /telegram-downloads).')
+    'Destination path for downloaded files (default is /telegram-downloads).')
+parser.add_argument(
+    "--temp",
+    type=str,
+    default=TELEGRAM_DAEMON_DEST,
+    help=
+    'Destination path for temporary files (default is using the same downloaded files directory).')
 parser.add_argument(
     "--channel",
     required=TELEGRAM_DAEMON_CHANNEL == None,
@@ -151,9 +162,9 @@ with TelegramClient(getSession(), api_id, api_hash,
 
             download_callback = lambda received, total: set_progress(filename, received, total)
 
-            await client.download_media(event.message, f"{downloadFolder}/{filename}.partial", progress_callback = download_callback)
+            await client.download_media(event.message, f"{downloadFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", progress_callback = download_callback)
             set_progress(filename, 1, 1)
-            rename(f"{downloadFolder}/{filename}.partial", f"{downloadFolder}/{filename}")
+            rename(f"{downloadFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", f"{downloadFolder}/{filename}")
             await log_reply(event, f"{filename} ready")
 
             queue.task_done()
