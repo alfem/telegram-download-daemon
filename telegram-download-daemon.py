@@ -143,6 +143,10 @@ with TelegramClient(getSession(), api_id, api_hash,
                 except:
                     output = "Some error occured while checking the status. Retry."
 
+            if command == "clean":
+                output = subprocess.run(["rm", "*.tdd", tempFolder], capture_output=True).stdout
+                output = output.decode('utf-8')
+
             await log_reply(event, output)
 
         if event.media:
