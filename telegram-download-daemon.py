@@ -91,8 +91,8 @@ async def sendHelloMessage(client, peerChannel):
 
 async def log_reply(event : events.ChatAction.Event, reply):
     print(reply)
-    await event.reply(reply)
-
+    await event.edit(reply)
+ 
 def getFilename(event: events.NewMessage.Event):
     for attribute in event.media.document.attributes:
         if isinstance(attribute, DocumentAttributeFilename): return attribute.file_name

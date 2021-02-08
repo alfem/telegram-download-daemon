@@ -10,7 +10,7 @@ or daemon to allow bigger downloads (limited to 1.5GB by Telegram APIs).
 
 # Installation
 
-You need Python3 (tested in 3.5).
+You need Python3 (tested in 3.6).
 
 Install dependencies by running this command:
 
@@ -44,7 +44,7 @@ You can also 'talk' to this daemon using your Telegram client:
 
 * Say "list" and get a list of available files in the destination path.
 * Say "status" to the daemon yo check the current status.
-
+* Say "clean" to remove stale (*.tdd) files from temporary directory.
 
 
 # Docker
