@@ -29,7 +29,8 @@ You need to configure these values:
 |--------------------------|:-----------------------:|--------------------------------------------------------------|---------------------|
 | `TELEGRAM_DAEMON_API_ID`   | `--api-id`              | api_id from https://core.telegram.org/api/obtaining_api_id   |                     |
 | `TELEGRAM_DAEMON_API_HASH` | `--api-hash`            | api_hash from https://core.telegram.org/api/obtaining_api_id |                     |
-| `TELEGRAM_DAEMON_DEST`     | `--dest`                | Destination path for downloading files                       | `/telegram-downloads` |
+| `TELEGRAM_DAEMON_DEST`     | `--dest`                | Destination path for downloaded files                       | `/telegram-downloads` |
+| `TELEGRAM_DAEMON_TEMP`     | `--temp`                | Destination path for temporary (download in progress) files                       | use --dest |
 | `TELEGRAM_DAEMON_CHANNEL`  | `--channel`             | Channel id to download from it                               |                     |
 
 You can define them as Environment Variables, or put them as a command line arguments, for example:
