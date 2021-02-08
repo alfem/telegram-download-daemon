@@ -132,8 +132,7 @@ with TelegramClient(getSession(), api_id, api_hash,
             output = "Unknown command"
 
             if command == "list":
-                output = subprocess.run(["ls", "-l", downloadFolder], stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
-                output = output.decode('utf-8')
+                output = subprocess.run(["ls -l "+downloadFolder], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
 
             if command == "status":
                 try:
@@ -144,8 +143,8 @@ with TelegramClient(getSession(), api_id, api_hash,
                     output = "Some error occured while checking the status. Retry."
 
             if command == "clean":
-                output = subprocess.run(["rm", "*.tdd", tempFolder], stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
-                output = output.decode('utf-8')
+                output = "Cleaning "+tempFolder+"\n"
+                output+=subprocess.run(["rm "+tempFolder+"/*."+TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
 
             await log_reply(event, output)
 
