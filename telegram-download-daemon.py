@@ -27,7 +27,7 @@ TELEGRAM_DAEMON_CHANNEL = getenv("TELEGRAM_DAEMON_CHANNEL")
 TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
 
 TELEGRAM_DAEMON_DEST=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
-TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
+TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", TELEGRAM_DAEMON_DEST)
 
 TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
@@ -58,7 +58,7 @@ parser.add_argument(
 parser.add_argument(
     "--temp",
     type=str,
-    default=TELEGRAM_DAEMON_DEST,
+    default=TELEGRAM_DAEMON_TEMP,
     help=
     'Destination path for temporary files (default is using the same downloaded files directory).')
 parser.add_argument(
@@ -77,6 +77,9 @@ channel_id = args.channel
 downloadFolder = args.dest
 tempFolder = args.temp
 worker_count = multiprocessing.cpu_count()
+
+if not tempFolder:
+    tempFolder = downloadFolder
 
 # Edit these lines:
 proxy = None
