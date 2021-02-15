@@ -97,9 +97,11 @@ async def log_reply(event : events.ChatAction.Event, reply):
     await event.edit(reply)
  
 def getFilename(event: events.NewMessage.Event):
+    mediaFileName = "unknown"
     for attribute in event.media.document.attributes:
         if isinstance(attribute, DocumentAttributeFilename): return attribute.file_name
-        if isinstance(attribute, DocumentAttributeVideo): return event.original_update.message.message
+        if isinstance(attribute, DocumentAttributeVideo): mediaFileName = event.original_update.message.message
+    return mediaFileName
 
 
 in_progress={}
