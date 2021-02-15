@@ -107,7 +107,7 @@ def getFilename(event: events.NewMessage.Event):
 
 in_progress={}
 
-def set_progress(filename, received, total):
+async def set_progress(filename, message, received, total):
     if received >= total:
         try: in_progress.pop(filename)
         except: pass
@@ -115,6 +115,10 @@ def set_progress(filename, received, total):
     percentage = math.trunc(received / total * 10000) / 100;
 
     in_progress[filename] = f"{percentage} % ({received} / {total})"
+
+    if (int(percentage) % 5) == 0:
+        await log_reply(message, f"{percentage} % ({received} / {total})")
+
 
 with TelegramClient(getSession(), api_id, api_hash,
                     proxy=proxy).start() as client:
@@ -152,7 +156,7 @@ with TelegramClient(getSession(), api_id, api_hash,
                 output = "Cleaning "+tempFolder+"\n"
                 output+=subprocess.run(["rm "+tempFolder+"/*."+TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
 
-            await event.reply(output)
+            await log_reply(event, output)
 
         if event.media:
             filename=getFilename(event)
@@ -173,10 +177,10 @@ with TelegramClient(getSession(), api_id, api_hash,
                 f"Downloading file {filename} ({event.media.document.size} bytes)"
             )
 
-            download_callback = lambda received, total: set_progress(filename, received, total)
+            download_callback = lambda received, total: set_progress(filename, message, received, total)
 
             await client.download_media(event.message, f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", progress_callback = download_callback)
-            set_progress(filename, 1, 1)
+            set_progress(filename, message, 100, 100)
             rename(f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", f"{downloadFolder}/{filename}")
             await log_reply(message, f"{filename} ready")
 
