@@ -6,6 +6,7 @@
 from os import getenv, rename
 import subprocess
 import math
+import pprint
 
 from sessionManager import getSession, saveSession
 
@@ -89,9 +90,9 @@ async def sendHelloMessage(client, peerChannel):
     await client.send_message(entity, "Hi! Ready for your files!")
  
 
-async def log_reply(event : events.ChatAction.Event, reply):
+async def log_reply(message, reply):
     print(reply)
-    await event.edit(reply)
+    await message.edit(reply)
  
 def getFilename(event: events.NewMessage.Event):
     for attribute in event.media.document.attributes:
@@ -146,21 +147,24 @@ with TelegramClient(getSession(), api_id, api_hash,
                 output = "Cleaning "+tempFolder+"\n"
                 output+=subprocess.run(["rm "+tempFolder+"/*."+TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
 
-            await log_reply(event, output)
+            await event.reply(output)
 
         if event.media:
             filename=getFilename(event)
-            await log_reply(event, f"{filename} added to queue")
-            queue.put_nowait(event)
+            message=await event.reply(f"{filename} added to queue")
+            await queue.put([event, message])
+            
 
     async def worker():
         while True:
-            event = await queue.get()
+            element = await queue.get()
+            event=element[0]
+            message=element[1]
 
             filename=getFilename(event)
 
             await log_reply(
-                event,
+                message,
                 f"Downloading file {filename} ({event.media.document.size} bytes)"
             )
 
@@ -169,7 +173,7 @@ with TelegramClient(getSession(), api_id, api_hash,
             await client.download_media(event.message, f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", progress_callback = download_callback)
             set_progress(filename, 1, 1)
             rename(f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", f"{downloadFolder}/{filename}")
-            await log_reply(event, f"{filename} ready")
+            await log_reply(message, f"{filename} ready")
 
             queue.task_done()
 
