@@ -112,7 +112,7 @@ async def set_progress(filename, message, received, total):
         try: in_progress.pop(filename)
         except: pass
         return
-    percentage = math.trunc(received / total * 10000) / 100;
+    percentage = math.trunc(received / total * 10000) / 100
 
     in_progress[filename] = f"{percentage} % ({received} / {total})"
 
