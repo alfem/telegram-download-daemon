@@ -6,7 +6,7 @@ If you have got an Internet connected computer or NAS and you want to automate f
 daemon is for you. 
 
 Telegram bots are limited to 20Mb file size downloads. So I wrote this agent
-or daemon to allow bigger downloads (limited to 1.5GB by Telegram APIs).
+or daemon to allow bigger downloads (limited to 2GB by Telegram APIs).
 
 # Installation
 
