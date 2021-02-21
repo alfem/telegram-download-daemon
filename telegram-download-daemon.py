@@ -21,7 +21,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.1"
+TDD_VERSION="1.2"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -87,11 +87,11 @@ if not tempFolder:
 # Edit these lines:
 proxy = None
 
-
 # End of interesting parameters
+
 async def sendHelloMessage(client, peerChannel):
     entity = await client.get_entity(peerChannel)
-    print("Hi! Ready for your files!")
+    print("Telegram Download Daemon "+TDD_VERSION)
     await client.send_message(entity, "Telegram Download Daemon "+TDD_VERSION)
     await client.send_message(entity, "Hi! Ready for your files!")
  
@@ -117,10 +117,11 @@ async def set_progress(filename, message, received, total):
         return
     percentage = math.trunc(received / total * 10000) / 100;
 
-    in_progress[filename] = f"{percentage} % ({received} / {total})"
+    progress_message= "{0} % ({1} / {2})".format(percentage, received, total)
+    in_progress[filename] = progress_message
 
     if (int(percentage) % 5) == 0:
-        await log_reply(message, f"{percentage} % ({received} / {total})")
+        await log_reply(message, progress_message)
 
 
 with TelegramClient(getSession(), api_id, api_hash,
@@ -148,7 +149,7 @@ with TelegramClient(getSession(), api_id, api_hash,
                 output = subprocess.run(["ls -l "+downloadFolder], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
             elif command == "status":
                 try:
-                    output = "".join([ f"{key}: {value}\n" for (key, value) in in_progress.items()])
+                    output = "".join([ "{0}: {1}\n".format(key,value) for (key, value) in in_progress.items()])
                     if output: 
                         output = "Active downloads:\n\n" + output
                     else: 
@@ -165,7 +166,7 @@ with TelegramClient(getSession(), api_id, api_hash,
 
         if event.media:
             filename=getFilename(event)
-            message=await event.reply(f"{filename} added to queue")
+            message=await event.reply("{0} added to queue".format(filename))
             await queue.put([event, message])
             
 
@@ -179,15 +180,15 @@ with TelegramClient(getSession(), api_id, api_hash,
 
             await log_reply(
                 message,
-                f"Downloading file {filename} ({event.media.document.size} bytes)"
+                "Downloading file {0} ({1} bytes)".format(filename,event.media.document.size)
             )
 
             download_callback = lambda received, total: set_progress(filename, message, received, total)
 
-            await client.download_media(event.message, f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", progress_callback = download_callback)
+            await client.download_media(event.message, "{0}/{1}.{2}".format(temFolder,filename,TELEGRAM_DAEMON_TEM_SUFFIX), progress_callback = download_callback)
             set_progress(filename, message, 100, 100)
-            rename(f"{tempFolder}/{filename}.{TELEGRAM_DAEMON_TEMP_SUFFIX}", f"{downloadFolder}/{filename}")
-            await log_reply(message, f"{filename} ready")
+            rename("{0}/{1}.{2}".format(temFolder,filename,TELEGRAM_DAEMON_TEM_SUFFIX), "{0}/{1}".format(downloadFolder,filename))
+            await log_reply(message, "{0} ready".format(filename))
 
             queue.task_done()
 
