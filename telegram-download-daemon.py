@@ -20,6 +20,9 @@ import multiprocessing
 import argparse
 import asyncio
 
+
+TDD_VERSION="1.1"
+
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
 TELEGRAM_DAEMON_CHANNEL = getenv("TELEGRAM_DAEMON_CHANNEL")
@@ -89,6 +92,7 @@ proxy = None
 async def sendHelloMessage(client, peerChannel):
     entity = await client.get_entity(peerChannel)
     print("Hi! Ready for your files!")
+    await client.send_message(entity, "Telegram Download Daemon "+TDD_VERSION)
     await client.send_message(entity, "Hi! Ready for your files!")
  
 
@@ -142,18 +146,20 @@ with TelegramClient(getSession(), api_id, api_hash,
 
             if command == "list":
                 output = subprocess.run(["ls -l "+downloadFolder], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
-
-            if command == "status":
+            elif command == "status":
                 try:
                     output = "".join([ f"{key}: {value}\n" for (key, value) in in_progress.items()])
-                    if output: output = "Active downloads:\n\n" + output
-                    else: output = "No active downloads"
+                    if output: 
+                        output = "Active downloads:\n\n" + output
+                    else: 
+                        output = "No active downloads"
                 except:
                     output = "Some error occured while checking the status. Retry."
-
-            if command == "clean":
+            elif command == "clean":
                 output = "Cleaning "+tempFolder+"\n"
                 output+=subprocess.run(["rm "+tempFolder+"/*."+TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT,encoding="utf-8").stdout
+            else:
+                output = "Available commands: list, status, clean"
 
             await log_reply(event, output)
 
