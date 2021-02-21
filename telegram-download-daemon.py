@@ -6,7 +6,6 @@
 from os import getenv, rename
 import subprocess
 import math
-import pprint
 
 from sessionManager import getSession, saveSession
 
