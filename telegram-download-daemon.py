@@ -120,8 +120,8 @@ async def set_progress(filename, message, received, total):
     progress_message= "{0} % ({1} / {2})".format(percentage, received, total)
     in_progress[filename] = progress_message
 
-    if (int(percentage) % 5) == 0:
-        await log_reply(message, progress_message)
+#    if (int(percentage) % 5) == 0:
+#        await log_reply(message, progress_message)
 
 
 with TelegramClient(getSession(), api_id, api_hash,
@@ -185,9 +185,9 @@ with TelegramClient(getSession(), api_id, api_hash,
 
             download_callback = lambda received, total: set_progress(filename, message, received, total)
 
-            await client.download_media(event.message, "{0}/{1}.{2}".format(temFolder,filename,TELEGRAM_DAEMON_TEM_SUFFIX), progress_callback = download_callback)
+            await client.download_media(event.message, "{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), progress_callback = download_callback)
             set_progress(filename, message, 100, 100)
-            rename("{0}/{1}.{2}".format(temFolder,filename,TELEGRAM_DAEMON_TEM_SUFFIX), "{0}/{1}".format(downloadFolder,filename))
+            rename("{0}/{1}.{2}".format(temFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), "{0}/{1}".format(downloadFolder,filename))
             await log_reply(message, "{0} ready".format(filename))
 
             queue.task_done()
