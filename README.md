@@ -2,6 +2,8 @@
 
 A Telegram Daemon (not a bot) for file downloading automation 
 
+<a href='https://ko-fi.com/alfem' target='_blank'><img height='35' style='border:0px;height:46px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' />
+
 If you have got an Internet connected computer or NAS and you want to automate file downloading from Telegram channels, this
 daemon is for you. 
 
