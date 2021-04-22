@@ -31,6 +31,7 @@ jobs:
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
           else
+            docker buildx create --use
             docker buildx build . --platform linux/amd64,linux/arm --file Dockerfile
           fi
 
