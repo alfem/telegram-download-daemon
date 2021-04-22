@@ -32,7 +32,7 @@ jobs:
             docker-compose --file docker-compose.test.yml run sut
           else
             docker buildx build . --platform linux/amd64,linux/arm --file Dockerfile
-fi
+          fi
 
   pushDockerHub:
     runs-on: ubuntu-latest
