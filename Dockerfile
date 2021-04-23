@@ -1,8 +1,4 @@
-FROM python:3.8
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		lsb-release \
-	&& rm -rf /var/lib/apt/lists/*
+FROM python:3.6
 
 COPY *.py /
 
