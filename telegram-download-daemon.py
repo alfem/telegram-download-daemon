@@ -3,8 +3,8 @@
 # Author: Alfonso E.M. <alfonso@el-magnifico.org>
 # You need to install telethon (and cryptg to speed up downloads)
 
-from os import getenv
-from shutil import move
+import os
+import shutil
 import subprocess
 import math
 import time
@@ -25,14 +25,14 @@ import asyncio
 
 TDD_VERSION="1.4"
 
-TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
-TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
-TELEGRAM_DAEMON_CHANNEL = getenv("TELEGRAM_DAEMON_CHANNEL")
+TELEGRAM_DAEMON_API_ID = os.getenv("TELEGRAM_DAEMON_API_ID")
+TELEGRAM_DAEMON_API_HASH = os.getenv("TELEGRAM_DAEMON_API_HASH")
+TELEGRAM_DAEMON_CHANNEL = os.getenv("TELEGRAM_DAEMON_CHANNEL")
 
-TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
+TELEGRAM_DAEMON_SESSION_PATH = os.getenv("TELEGRAM_DAEMON_SESSION_PATH")
 
-TELEGRAM_DAEMON_DEST=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
-TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
+TELEGRAM_DAEMON_DEST=os.getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
+TELEGRAM_DAEMON_TEMP=os.getenv("TELEGRAM_DAEMON_TEMP", "")
 
 TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
@@ -184,6 +184,7 @@ with TelegramClient(getSession(), api_id, api_hash,
                 print('Events handler error: ', e)
 
     async def worker():
+        global downloadFolder
         while True:
             try:
                 element = await queue.get()
@@ -201,12 +202,35 @@ with TelegramClient(getSession(), api_id, api_hash,
 
                 await client.download_media(event.message, "{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), progress_callback = download_callback)
                 set_progress(filename, message, 100, 100)
-                move("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), "{0}/{1}".format(downloadFolder,filename))
+                _downloadFolder = downloadFolder
+                if event.message.message:
+                    try:
+                        _dir = os.path.splitext(filename)[0]
+                    except:
+                        _dir = filename
+                    _downloadFolder = os.path.join(downloadFolder, _dir)
+                    if not os.path.exists(_downloadFolder):
+                        os.makedirs(_downloadFolder)
+                    with open(os.path.join(_downloadFolder, "message.txt"), "w") as f:
+                        f.write(f'{event.message.message}\n')
+                try:
+                    move_from = os.path.join(tempFolder, "{}.{}".format(filename,TELEGRAM_DAEMON_TEMP_SUFFIX))
+                    move_to = os.path.join(_downloadFolder, filename)
+                    if os.path.exists(move_from):
+                        shutil.move(move_from, move_to)
+                    else:
+                        set_progress(filename, f"error: tmpfile for '{filename}' doesn't exist!", 0, 0)
+                except Exception as exc:
+                    set_progress(filename, f"shutil error: {str(exc)}", 0, 0)
+                    print('shutil error: ', exc)
+
                 await log_reply(message, "{0} ready".format(filename))
 
                 queue.task_done()
             except Exception as e:
+                set_progress(filename, f"Queue worker error: {str(e)}", 0, 0)
                 print('Queue worker error: ', e)
+
  
     async def start():
 
