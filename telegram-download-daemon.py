@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import math
 import time
+import random, string
 
 from sessionManager import getSession, saveSession
 
@@ -208,16 +209,25 @@ with TelegramClient(getSession(), api_id, api_hash,
                         _dir = os.path.splitext(filename)[0]
                     except:
                         _dir = filename
-                    _downloadFolder = os.path.join(downloadFolder, _dir)
-                    if not os.path.exists(_downloadFolder):
+                    if not os.path.exists(os.path.join(downloadFolder, _dir)):
+                        _downloadFolder = os.path.join(downloadFolder, _dir)
+                        os.makedirs(_downloadFolder)
+                    else:
+                        _dir += ''.join(random.choice(string.ascii_letters) for x in range(6))
+                        _downloadFolder = os.path.join(downloadFolder, _dir)
                         os.makedirs(_downloadFolder)
                     with open(os.path.join(_downloadFolder, "message.txt"), "w") as f:
                         f.write(f'{event.message.message}\n')
                 try:
                     move_from = os.path.join(tempFolder, "{}.{}".format(filename,TELEGRAM_DAEMON_TEMP_SUFFIX))
-                    move_to = os.path.join(_downloadFolder, filename)
+                    
                     if os.path.exists(move_from):
-                        shutil.move(move_from, move_to)
+                        if os.path.exists(os.path.join(_downloadFolder, filename)):
+                            _filename = ''.join(random.choice(string.ascii_letters) for x in range(6)) + filename
+                            move_to = os.path.join(_downloadFolder, _filename)
+                        else:
+                            move_to = os.path.join(_downloadFolder, filename)
+                            shutil.move(move_from, move_to)
                     else:
                         set_progress(filename, f"error: tmpfile for '{filename}' doesn't exist!", 0, 0)
                 except Exception as exc:
