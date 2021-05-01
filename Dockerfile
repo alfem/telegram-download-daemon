@@ -4,6 +4,6 @@ COPY *.py /
 
 RUN echo $TARGETPLATFORM
 
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then pip install telethon; else pip install telethon cryptg
+RUN test  "$TARGETPLATFORM" = "linux/arm64" && pip install telethon || else pip install telethon cryptg
 
 CMD [ "python", "./telegram-download-daemon.py" ]
