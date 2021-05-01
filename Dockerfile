@@ -5,6 +5,7 @@ COPY *.py /
 RUN echo $TARGETPLATFORM
 
 RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+    mv /usr/bin/lsb_release /usr/bin/lsb_release.bak \
     pip install telethon; \
   else \
     pip install telethon cryptg; \
