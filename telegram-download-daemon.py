@@ -3,11 +3,13 @@
 # Author: Alfonso E.M. <alfonso@el-magnifico.org>
 # You need to install telethon (and cryptg to speed up downloads)
 
-from os import getenv
+from os import getenv, path
 from shutil import move
 import subprocess
 import math
 import time
+import random
+import string
 
 from sessionManager import getSession, saveSession
 
@@ -23,7 +25,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.4"
+TDD_VERSION="1.5"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -104,12 +106,22 @@ async def sendHelloMessage(client, peerChannel):
 async def log_reply(message, reply):
     print(reply)
     await message.edit(reply)
+
+def getRandomId(len):
+    chars=string.ascii_lowercase + string.digits
+    return  ''.join(random.choice(chars) for x in range(len))
  
 def getFilename(event: events.NewMessage.Event):
     mediaFileName = "unknown"
     for attribute in event.media.document.attributes:
-        if isinstance(attribute, DocumentAttributeFilename): return attribute.file_name
+        if isinstance(attribute, DocumentAttributeFilename): 
+          mediaFileName=attribute.file_name
+          break     
         if isinstance(attribute, DocumentAttributeVideo): mediaFileName = event.original_update.message.message
+
+    if path.exists("{0}/{1}.{2}".format(tempFolder,mediaFileName,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,mediaFileName)):
+       mediaFileName=mediaFileName+"."+getRandomId(8)
+       
     return mediaFileName
 
 
