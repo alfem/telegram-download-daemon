@@ -12,7 +12,7 @@ or daemon to allow bigger downloads (limited to 2GB by Telegram APIs).
 
 # Installation
 
-You need Python3 (tested in 3.6).
+You need Python3 (3.6 works fine, 3.5 will crash randomly).
 
 Install dependencies by running this command:
 
