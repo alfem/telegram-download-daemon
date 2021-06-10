@@ -25,7 +25,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.5"
+TDD_VERSION="1.6"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -189,9 +189,13 @@ with TelegramClient(getSession(), api_id, api_hash,
                 await log_reply(event, output)
 
             if event.media:
-                filename=getFilename(event)
-                message=await event.reply("{0} added to queue".format(filename))
-                await queue.put([event, message])
+                if hasattr(event.media, 'document'):
+                    filename=getFilename(event)
+                    message=await event.reply("{0} added to queue".format(filename))
+                    await queue.put([event, message])
+                else:
+                    message=await event.reply("That is not downloadable. Try to send it as a file.")
+
         except Exception as e:
                 print('Events handler error: ', e)
 
