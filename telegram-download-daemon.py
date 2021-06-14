@@ -222,6 +222,8 @@ with TelegramClient(getSession(), api_id, api_hash,
 
                 queue.task_done()
             except Exception as e:
+                try: await log_reply(message, "Error: {}".format(str(e))) # If it failed, inform the user about it.
+                except: pass
                 print('Queue worker error: ', e)
  
     async def start():
