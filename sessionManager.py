@@ -3,7 +3,7 @@ from telethon.sessions import StringSession
 
 TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
 sessionName = "DownloadDaemon"
-stringSessionFilename = f"{sessionName}.session"
+stringSessionFilename = "{0}.session".format(sessionName)
 
 
 def _getStringSessionIfExists():
@@ -12,7 +12,7 @@ def _getStringSessionIfExists():
     if path.isfile(sessionPath):
         with open(sessionPath, 'r') as file:
             session = file.read()
-            print(f"Session loaded from {sessionPath}")
+            print("Session loaded from {0}".format(sessionPath))
             return session
     return None
 
@@ -30,4 +30,4 @@ def saveSession(session):
                                 stringSessionFilename)
         with open(sessionPath, 'w') as file:
             file.write(StringSession.save(session))
-        print(f"Session saved in {sessionPath}")
+        print("Session saved in {0}".format(sessionPath))
