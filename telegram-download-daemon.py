@@ -135,7 +135,7 @@ async def set_progress(filename, message, received, total):
         try: in_progress.pop(filename)
         except: pass
         return
-    percentage = math.trunc(received / total * 10000) / 100;
+    percentage = math.trunc(received / total * 10000) / 100
 
     progress_message= "{0} % ({1} / {2})".format(percentage, received, total)
     in_progress[filename] = progress_message
@@ -222,6 +222,8 @@ with TelegramClient(getSession(), api_id, api_hash,
 
                 queue.task_done()
             except Exception as e:
+                try: await log_reply(message, "Error: {}".format(str(e))) # If it failed, inform the user about it.
+                except: pass
                 print('Queue worker error: ', e)
  
     async def start():
