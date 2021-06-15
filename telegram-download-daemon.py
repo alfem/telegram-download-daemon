@@ -10,6 +10,7 @@ import math
 import time
 import random
 import string
+import os.path
 
 from sessionManager import getSession, saveSession
 
@@ -25,7 +26,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.7"
+TDD_VERSION="1.8"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -120,7 +121,8 @@ def getFilename(event: events.NewMessage.Event):
         if isinstance(attribute, DocumentAttributeVideo): mediaFileName = event.original_update.message.message
 
     if path.exists("{0}/{1}.{2}".format(tempFolder,mediaFileName,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,mediaFileName)):
-       mediaFileName=mediaFileName+"."+getRandomId(8)
+       fileName, fileExtension = os.path.splitext(mediaFileName)
+       mediaFileName=fileName+"-"+getRandomId(8)+fileExtension
        
     return mediaFileName
 
