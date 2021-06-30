@@ -26,7 +26,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.8"
+TDD_VERSION="1.9"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -119,6 +119,8 @@ def getFilename(event: events.NewMessage.Event):
           mediaFileName=attribute.file_name
           break     
         if isinstance(attribute, DocumentAttributeVideo): mediaFileName = event.original_update.message.message
+
+    mediaFileName="".join(c for c in mediaFileName if c.isalnum() or c in "()._- ")
 
     if path.exists("{0}/{1}.{2}".format(tempFolder,mediaFileName,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,mediaFileName)):
        fileName, fileExtension = os.path.splitext(mediaFileName)
