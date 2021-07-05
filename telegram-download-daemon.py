@@ -11,6 +11,7 @@ import time
 import random
 import string
 import os.path
+from mimetypes import guess_extension
 
 from sessionManager import getSession, saveSession
 
@@ -26,7 +27,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.9"
+TDD_VERSION="1.10"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -114,11 +115,17 @@ def getRandomId(len):
  
 def getFilename(event: events.NewMessage.Event):
     mediaFileName = "unknown"
+    
     for attribute in event.media.document.attributes:
         if isinstance(attribute, DocumentAttributeFilename): 
           mediaFileName=attribute.file_name
           break     
-        if isinstance(attribute, DocumentAttributeVideo): mediaFileName = event.original_update.message.message
+        if isinstance(attribute, DocumentAttributeVideo):
+          if event.original_update.message.message != '': 
+              mediaFileName = event.original_update.message.message
+          else:    
+              mediaFileName = str(event.message.media.document.id)
+          mediaFileName+=guess_extension(event.message.media.document.mime_type)    
 
     mediaFileName="".join(c for c in mediaFileName if c.isalnum() or c in "()._- ")
 
