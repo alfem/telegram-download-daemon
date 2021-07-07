@@ -27,7 +27,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.10"
+TDD_VERSION="1.11"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -41,7 +41,7 @@ TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
 TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
 parser = argparse.ArgumentParser(
-    description="Script to download files from Telegram Channel.")
+    description="Script to download files from a Telegram Channel.")
 parser.add_argument(
     "--api-id",
     required=TELEGRAM_DAEMON_API_ID == None,
