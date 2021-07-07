@@ -36,6 +36,7 @@ You need to configure these values:
 | `TELEGRAM_DAEMON_DEST`     | `--dest`                | Destination path for downloaded files                       | `/telegram-downloads` |
 | `TELEGRAM_DAEMON_TEMP`     | `--temp`                | Destination path for temporary (download in progress) files                       | use --dest |
 | `TELEGRAM_DAEMON_CHANNEL`  | `--channel`             | Channel id to download from it                               |                     |
+| `TELEGRAM_DAEMON_DUPLICATES`  | `--duplicates`             | What to do with duplicated files: ignore, overwrite or rename them | rename                     |
 
 You can define them as Environment Variables, or put them as a command line arguments, for example:
 

@@ -37,6 +37,7 @@ TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
 
 TELEGRAM_DAEMON_DEST=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
 TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
+TELEGRAM_DAEMON_DUPLICATES=getenv("TELEGRAM_DAEMON_DUPLICATES", "rename")
 
 TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
@@ -78,6 +79,14 @@ parser.add_argument(
     help=
     'Channel id to download from it (default is TELEGRAM_DAEMON_CHANNEL env var'
 )
+parser.add_argument(
+    "--duplicates",
+    choices=["ignore", "rename", "overwrite"],
+    type=str,
+    default=TELEGRAM_DAEMON_DUPLICATES,
+    help=
+    '"ignore"=do not download duplicated files, "rename"=add a random suffix, "overwrite"=redownload and overwrite.'
+)
 args = parser.parse_args()
 
 api_id = args.api_id
@@ -85,6 +94,7 @@ api_hash = args.api_hash
 channel_id = args.channel
 downloadFolder = args.dest
 tempFolder = args.temp
+duplicates=args.duplicates
 worker_count = multiprocessing.cpu_count()
 updateFrequency = 10
 lastUpdate = 0
@@ -128,11 +138,7 @@ def getFilename(event: events.NewMessage.Event):
           mediaFileName+=guess_extension(event.message.media.document.mime_type)    
 
     mediaFileName="".join(c for c in mediaFileName if c.isalnum() or c in "()._- ")
-
-    if path.exists("{0}/{1}.{2}".format(tempFolder,mediaFileName,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,mediaFileName)):
-       fileName, fileExtension = os.path.splitext(mediaFileName)
-       mediaFileName=fileName+"-"+getRandomId(8)+fileExtension
-       
+      
     return mediaFileName
 
 
@@ -202,8 +208,11 @@ with TelegramClient(getSession(), api_id, api_hash,
             if event.media:
                 if hasattr(event.media, 'document'):
                     filename=getFilename(event)
-                    message=await event.reply("{0} added to queue".format(filename))
-                    await queue.put([event, message])
+                    if ( path.exists("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,filename)) ) and duplicates == "ignore":
+                        message=await event.reply("{0} already exists. Ignoring it.".format(filename))
+                    else:
+                        message=await event.reply("{0} added to queue".format(filename))
+                        await queue.put([event, message])
                 else:
                     message=await event.reply("That is not downloadable. Try to send it as a file.")
 
@@ -218,6 +227,12 @@ with TelegramClient(getSession(), api_id, api_hash,
                 message=element[1]
 
                 filename=getFilename(event)
+                fileName, fileExtension = os.path.splitext(filename)
+                tempfilename=fileName+"-"+getRandomId(8)+fileExtension
+
+                if path.exists("{0}/{1}.{2}".format(tempFolder,tempfilename,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,filename)):
+                    if duplicates == "rename":
+                       filename=tempfilename
 
                 await log_reply(
                     message,
