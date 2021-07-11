@@ -27,7 +27,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.11"
+TDD_VERSION="1.12"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -125,18 +125,21 @@ def getRandomId(len):
  
 def getFilename(event: events.NewMessage.Event):
     mediaFileName = "unknown"
-    
-    for attribute in event.media.document.attributes:
-        if isinstance(attribute, DocumentAttributeFilename): 
-          mediaFileName=attribute.file_name
-          break     
-        if isinstance(attribute, DocumentAttributeVideo):
-          if event.original_update.message.message != '': 
-              mediaFileName = event.original_update.message.message
-          else:    
-              mediaFileName = str(event.message.media.document.id)
-          mediaFileName+=guess_extension(event.message.media.document.mime_type)    
 
+    if hasattr(event.media, 'photo'):
+        mediaFileName = str(event.media.photo.id)+".jpeg"
+    elif hasattr(event.media, 'document'):
+        for attribute in event.media.document.attributes:
+            if isinstance(attribute, DocumentAttributeFilename): 
+              mediaFileName=attribute.file_name
+              break     
+            if isinstance(attribute, DocumentAttributeVideo):
+              if event.original_update.message.message != '': 
+                  mediaFileName = event.original_update.message.message
+              else:    
+                  mediaFileName = str(event.message.media.document.id)
+              mediaFileName+=guess_extension(event.message.media.document.mime_type)    
+     
     mediaFileName="".join(c for c in mediaFileName if c.isalnum() or c in "()._- ")
       
     return mediaFileName
@@ -206,7 +209,7 @@ with TelegramClient(getSession(), api_id, api_hash,
                 await log_reply(event, output)
 
             if event.media:
-                if hasattr(event.media, 'document'):
+                if hasattr(event.media, 'document') or hasattr(event.media,'photo'):
                     filename=getFilename(event)
                     if ( path.exists("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,filename)) ) and duplicates == "ignore":
                         message=await event.reply("{0} already exists. Ignoring it.".format(filename))
@@ -234,9 +237,15 @@ with TelegramClient(getSession(), api_id, api_hash,
                     if duplicates == "rename":
                        filename=tempfilename
 
+ 
+                if hasattr(event.media, 'photo'):
+                   size = 0
+                else: 
+                   size=event.media.document.size
+
                 await log_reply(
                     message,
-                    "Downloading file {0} ({1} bytes)".format(filename,event.media.document.size)
+                    "Downloading file {0} ({1} bytes)".format(filename,size)
                 )
 
                 download_callback = lambda received, total: set_progress(filename, message, received, total)
