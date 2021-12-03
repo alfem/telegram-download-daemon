@@ -15,7 +15,7 @@ from mimetypes import guess_extension
 
 from sessionManager import getSession, saveSession
 
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, __version__
 from telethon.tl.types import PeerChannel, DocumentAttributeFilename, DocumentAttributeVideo
 import logging
 
@@ -27,7 +27,7 @@ import argparse
 import asyncio
 
 
-TDD_VERSION="1.12"
+TDD_VERSION="1.13"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -110,8 +110,8 @@ proxy = None
 
 async def sendHelloMessage(client, peerChannel):
     entity = await client.get_entity(peerChannel)
-    print("Telegram Download Daemon "+TDD_VERSION)
-    await client.send_message(entity, "Telegram Download Daemon "+TDD_VERSION)
+    print("Telegram Download Daemon "+TDD_VERSION+" using Telethon "+__version__)
+    await client.send_message(entity, "Telegram Download Daemon "+TDD_VERSION+" using Telethon "+__version__)
     await client.send_message(entity, "Hi! Ready for your files!")
  
 
