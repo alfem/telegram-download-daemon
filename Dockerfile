@@ -1,6 +1,8 @@
 FROM python:3.6
 
-COPY *.py /
+WORKDIR /app
+
+COPY *.py ./
 
 RUN echo $TARGETPLATFORM
 
