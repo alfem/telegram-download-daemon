@@ -2,8 +2,8 @@ version: '3.5'
 
 services:
   telegram-download-daemon:
-    build: .
-    image: telegram-download-daemon:latest
+    #build: .
+    image: alfem/telegram-download-daemon:latest
     environment:
       TELEGRAM_DAEMON_API_ID: "YOUR API ID HERE"
       TELEGRAM_DAEMON_API_HASH: "YOUR API HASH HERE"
