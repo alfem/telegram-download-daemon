@@ -1,5 +1,5 @@
 cffi==1.14.0
-cryptg==0.2.post0
+cryptg==0.3
 pyaes==1.6.1
 pyasn1==0.4.8
 pycparser==2.20
