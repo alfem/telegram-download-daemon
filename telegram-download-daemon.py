@@ -39,6 +39,8 @@ TELEGRAM_DAEMON_DEST=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
 TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
 TELEGRAM_DAEMON_DUPLICATES=getenv("TELEGRAM_DAEMON_DUPLICATES", "rename")
 
+TELEGRAM_DAEMON_HELLO=getenv("TELEGRAM_DAEMON_HELLO", "1")
+
 TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
 parser = argparse.ArgumentParser(
@@ -87,6 +89,20 @@ parser.add_argument(
     help=
     '"ignore"=do not download duplicated files, "rename"=add a random suffix, "overwrite"=redownload and overwrite.'
 )
+parser.add_argument(
+    "--hello",
+    action='store_true',
+    default=bool(TELEGRAM_DAEMON_HELLO),
+    help=
+    'Say hello when joining the channel'
+)
+parser.add_argument(
+    "--no-hello",
+    dest='hello',
+    action='store_false',
+    help=
+    'Don\'t say hello when joining the channel'
+)
 args = parser.parse_args()
 
 api_id = args.api_id
@@ -94,7 +110,8 @@ api_hash = args.api_hash
 channel_id = args.channel
 downloadFolder = args.dest
 tempFolder = args.temp
-duplicates=args.duplicates
+duplicates = args.duplicates
+hello = args.hello
 worker_count = multiprocessing.cpu_count()
 updateFrequency = 10
 lastUpdate = 0
@@ -268,7 +285,8 @@ with TelegramClient(getSession(), api_id, api_hash,
         for i in range(worker_count):
             task = loop.create_task(worker())
             tasks.append(task)
-        await sendHelloMessage(client, peerChannel)
+        if hello:
+            await sendHelloMessage(client, peerChannel)
         await client.run_until_disconnected()
         for task in tasks:
             task.cancel()
