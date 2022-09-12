@@ -1,6 +1,6 @@
 # telegram-download-daemon
 
-A Telegram Daemon (not a bot) for file downloading automation [for channels of which you have admin priviliges](https://github.com/alfem/telegram-download-daemon/issues/48).
+A Telegram Daemon (not a bot) for file downloading automation [for channels of which you have admin privileges](https://github.com/alfem/telegram-download-daemon/issues/48).
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E03K0RP)
 
