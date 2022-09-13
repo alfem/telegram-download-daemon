@@ -1,0 +1,2 @@
+class ChannelStrategyNotFoundException(BaseException):
+    pass

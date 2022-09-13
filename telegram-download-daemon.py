@@ -3,31 +3,31 @@
 # Author: Alfonso E.M. <alfonso@el-magnifico.org>
 # You need to install telethon (and cryptg to speed up downloads)
 
+import argparse
+import asyncio
+import logging
+import math
+import multiprocessing
+import os.path
+import subprocess
+import time
 from os import getenv, path
 from shutil import move
-import subprocess
-import math
-import time
-import random
-import string
-import os.path
-from mimetypes import guess_extension
-
-from sessionManager import getSession, saveSession
 
 from telethon import TelegramClient, events, __version__
-from telethon.tl.types import PeerChannel, DocumentAttributeFilename, DocumentAttributeVideo
-import logging
+from telethon.tl.types import PeerChannel
+
+from config.daemon_config import DaemonConfig
+from daemon.telegram_daemon import Daemon
+from sessionManager import getSession, saveSession
+from strategies.base import BaseChannelManager
+from strategies.channel_strategy_factory import ChannelStrategyFactory
+from utils.event_utils import EventUtils
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s]%(name)s:%(message)s',
                     level=logging.WARNING)
 
-import multiprocessing
-import argparse
-import asyncio
-
-
-TDD_VERSION="1.13"
+TDD_VERSION = "1.13"
 
 TELEGRAM_DAEMON_API_ID = getenv("TELEGRAM_DAEMON_API_ID")
 TELEGRAM_DAEMON_API_HASH = getenv("TELEGRAM_DAEMON_API_HASH")
@@ -35,11 +35,11 @@ TELEGRAM_DAEMON_CHANNEL = getenv("TELEGRAM_DAEMON_CHANNEL")
 
 TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
 
-TELEGRAM_DAEMON_DEST=getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
-TELEGRAM_DAEMON_TEMP=getenv("TELEGRAM_DAEMON_TEMP", "")
-TELEGRAM_DAEMON_DUPLICATES=getenv("TELEGRAM_DAEMON_DUPLICATES", "rename")
+TELEGRAM_DAEMON_DEST = getenv("TELEGRAM_DAEMON_DEST", "/telegram-downloads")
+TELEGRAM_DAEMON_TEMP = getenv("TELEGRAM_DAEMON_TEMP", "")
+TELEGRAM_DAEMON_DUPLICATES = getenv("TELEGRAM_DAEMON_DUPLICATES", "rename")
 
-TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
+TELEGRAM_DAEMON_TEMP_SUFFIX = "tdd"
 
 parser = argparse.ArgumentParser(
     description="Script to download files from a Telegram Channel.")
@@ -94,11 +94,11 @@ api_hash = args.api_hash
 channel_id = args.channel
 downloadFolder = args.dest
 tempFolder = args.temp
-duplicates=args.duplicates
+duplicates = args.duplicates
 worker_count = multiprocessing.cpu_count()
 updateFrequency = 10
 lastUpdate = 0
-#multiprocessing.Value('f', 0)
+# multiprocessing.Value('f', 0)
 
 if not tempFolder:
     tempFolder = downloadFolder
@@ -106,172 +106,144 @@ if not tempFolder:
 # Edit these lines:
 proxy = None
 
+utils: EventUtils = EventUtils()
+daemon_config: DaemonConfig = DaemonConfig()
+daemon_config.set_api_id(api_id)
+daemon_config.set_api_hash(api_hash)
+daemon_config.set_channel(channel_id)
+daemon_config.set_dest(downloadFolder)
+daemon_config.set_temp(tempFolder)
+daemon_config.set_duplicates(duplicates)
+daemon_config.set_update_frequency(updateFrequency)
+daemon_config.set_last_update(lastUpdate)
+
+channel_manager_factory: ChannelStrategyFactory = ChannelStrategyFactory(daemon_config)
+#manager: BaseChannelManager = BaseChannelManager(daemon_config)
+
+
+
 # End of interesting parameters
 
-async def sendHelloMessage(client, peerChannel):
-    entity = await client.get_entity(peerChannel)
-    print("Telegram Download Daemon "+TDD_VERSION+" using Telethon "+__version__)
-    await client.send_message(entity, "Telegram Download Daemon "+TDD_VERSION+" using Telethon "+__version__)
-    await client.send_message(entity, "Hi! Ready for your files!")
- 
-
-async def log_reply(message, reply):
-    print(reply)
-    await message.edit(reply)
-
-def getRandomId(len):
-    chars=string.ascii_lowercase + string.digits
-    return  ''.join(random.choice(chars) for x in range(len))
- 
-def getFilename(event: events.NewMessage.Event):
-    mediaFileName = "unknown"
-
-    if hasattr(event.media, 'photo'):
-        mediaFileName = str(event.media.photo.id)+".jpeg"
-    elif hasattr(event.media, 'document'):
-        for attribute in event.media.document.attributes:
-            if isinstance(attribute, DocumentAttributeFilename): 
-              mediaFileName=attribute.file_name
-              break     
-            if isinstance(attribute, DocumentAttributeVideo):
-              if event.original_update.message.message != '': 
-                  mediaFileName = event.original_update.message.message
-              else:    
-                  mediaFileName = str(event.message.media.document.id)
-              mediaFileName+=guess_extension(event.message.media.document.mime_type)    
-     
-    mediaFileName="".join(c for c in mediaFileName if c.isalnum() or c in "()._- ")
-      
-    return mediaFileName
+#async def send_hello_message(t_client: TelegramClient, peer_channel: PeerChannel):
+#    entity = await t_client.get_entity(peer_channel)
+#    print("Telegram Download Daemon " + TDD_VERSION + " using Telethon " + __version__)
+#    await t_client.send_message(entity, "Telegram Download Daemon " + TDD_VERSION + " using Telethon " + __version__)
+#    await t_client.send_message(entity, "Hi! Ready for your files!")
 
 
-in_progress={}
+#in_progress = {}
 
-async def set_progress(filename, message, received, total):
-    global lastUpdate
-    global updateFrequency
+#with TelegramClient(getSession(), api_id, api_hash,
+#                    proxy=proxy).start() as client:
+#    saveSession(client.session)
 
-    if received >= total:
-        try: in_progress.pop(filename)
-        except: pass
-        return
-    percentage = math.trunc(received / total * 10000) / 100
+#   queue = asyncio.Queue()
+#    peerChannel = PeerChannel(channel_id)
+#    last_forwarded_channel_id: int = 0
 
-    progress_message= "{0} % ({1} / {2})".format(percentage, received, total)
-    in_progress[filename] = progress_message
+#    @client.on(events.NewMessage())
+#    async def handler(event):
 
-    currentTime=time.time()
-    if (currentTime - lastUpdate) > updateFrequency:
-        await log_reply(message, progress_message)
-        lastUpdate=currentTime
+#        if event.to_id != peerChannel:
+#            return
+
+#        print(event)
+#        if event.message.fwd_from is not None:
+#            last_forwarded_channel_id = event.message.fwd_from.from_id.channel_id
+#            print(f"last_forwarded_channel_id has been set to : {last_forwarded_channel_id}")
+
+        # print(f"Identificador del canal desde el que se hace fwd: {event.message.fwd_from.from_id.channel_id}")
+#       try:
+#            if not event.media and event.message:
+#                command = event.message.message
+#                command = command.lower()
+#                output = "Unknown command"
+
+#               if command == "list":
+#                    output = subprocess.run(["ls -l " + downloadFolder], shell=True, stdout=subprocess.PIPE,
+#                                            stderr=subprocess.STDOUT).stdout.decode('utf-8')
+#                elif command == "status":
+#                    try:
+#                        output = "".join(["{0}: {1}\n".format(key, value) for (key, value) in in_progress.items()])
+#                        if output:
+#                            output = "Active downloads:\n\n" + output
+#                        else:
+#                            output = "No active downloads"
+#                    except:
+#                        output = "Some error occured while checking the status. Retry."
+#                elif command == "clean":
+#                    output = "Cleaning " + tempFolder + "\n"
+#                    output += subprocess.run(["rm " + tempFolder + "/*." + TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True,
+#                                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT).stdout
+#                else:
+#                    output = "Available commands: list, status, clean"
+#
+#                await utils.log_reply(event, output)
+
+#            if event.media:
+#                if hasattr(event.media, 'document') or hasattr(event.media, 'photo'):
+#                    filename = utils.get_file_name(event)
+#                    if (path.exists(
+#                            "{0}/{1}.{2}".format(tempFolder, filename, TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists(
+#                        "{0}/{1}".format(downloadFolder, filename))) and duplicates == "ignore":
+#                        message = await event.reply("{0} already exists. Ignoring it.".format(filename))
+#                    else:
+#                        message = await event.reply("{0} added to queue".format(filename))
+#                        await queue.put([event, message])
+#                else:
+#                    message = await event.reply("That is not downloadable. Try to send it as a file.")
+#
+#        except Exception as e:
+#            print('Events handler error: ', e)
 
 
-with TelegramClient(getSession(), api_id, api_hash,
-                    proxy=proxy).start() as client:
+#   async def worker():
+#        manager: BaseChannelManager = BaseChannelManager(daemon_config)
+#        while True:
+#            print("Entro en el while true")
+#            element = await queue.get()
+#            try:
+#                #manager: BaseChannelManager = BaseChannelManager(client, daemon_config)
+#                print(f"Worker code prior to factory call:")
+#                print(f"Message: {element[0].message}")
+#                if element[0].message.fwd_from is not None:
+#                    print(f"FWD FROM content: {element[0].message.fwd_from}")
+#                    print(f"FROM_ID FROM content: {element[0].message.fwd_from.from_id}")
+#                    print(f"Channel id on the message: {element[0].message.fwd_from.from_id.channel_id}")
+#                    last_forwarded_channel_id = element[0].message.fwd_from.from_id.channel_id
 
-    saveSession(client.session)
+#                manager = channel_manager_factory.get_channel_manager(last_forwarded_channel_id)
 
-    queue = asyncio.Queue()
-    peerChannel = PeerChannel(channel_id)
+#                if manager is not None:
+#                    await manager.manage_new_message_event(client, queue, element, in_progress)
+#                    queue.task_done()
+#                else:
+#                    print("ERROR: manager is None, can not handle the logic properly.")
+#            except Exception as e:
+#                logging.exception("message")
+#                try:
+#                    await utils.log_reply(element[0],
+#                                          "Error: {}".format(str(e)))  # If it failed, inform the user about it.
+#                except:
+#                    pass
+#                print('Queue worker error: ', e)
 
-    @client.on(events.NewMessage())
-    async def handler(event):
 
-        if event.to_id != peerChannel:
-            return
+#   async def start():
+#        tasks = []
+#        loop = asyncio.get_event_loop()
+#        for i in range(worker_count):
+#            task = loop.create_task(worker())
+#            tasks.append(task)
+#        await send_hello_message(client, peerChannel)
+#        await client.run_until_disconnected()
+#        for task in tasks:
+#            task.cancel()
+#        await asyncio.gather(*tasks, return_exceptions=True)
 
-        print(event)
-        
-        try:
 
-            if not event.media and event.message:
-                command = event.message.message
-                command = command.lower()
-                output = "Unknown command"
+#    client.loop.run_until_complete(start())
 
-                if command == "list":
-                    output = subprocess.run(["ls -l "+downloadFolder], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout.decode('utf-8')
-                elif command == "status":
-                    try:
-                        output = "".join([ "{0}: {1}\n".format(key,value) for (key, value) in in_progress.items()])
-                        if output: 
-                            output = "Active downloads:\n\n" + output
-                        else: 
-                            output = "No active downloads"
-                    except:
-                        output = "Some error occured while checking the status. Retry."
-                elif command == "clean":
-                    output = "Cleaning "+tempFolder+"\n"
-                    output+=subprocess.run(["rm "+tempFolder+"/*."+TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout
-                else:
-                    output = "Available commands: list, status, clean"
+telegram_daemon: Daemon = Daemon(daemon_config)
+telegram_daemon.run()
 
-                await log_reply(event, output)
-
-            if event.media:
-                if hasattr(event.media, 'document') or hasattr(event.media,'photo'):
-                    filename=getFilename(event)
-                    if ( path.exists("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,filename)) ) and duplicates == "ignore":
-                        message=await event.reply("{0} already exists. Ignoring it.".format(filename))
-                    else:
-                        message=await event.reply("{0} added to queue".format(filename))
-                        await queue.put([event, message])
-                else:
-                    message=await event.reply("That is not downloadable. Try to send it as a file.")
-
-        except Exception as e:
-                print('Events handler error: ', e)
-
-    async def worker():
-        while True:
-            try:
-                element = await queue.get()
-                event=element[0]
-                message=element[1]
-
-                filename=getFilename(event)
-                fileName, fileExtension = os.path.splitext(filename)
-                tempfilename=fileName+"-"+getRandomId(8)+fileExtension
-
-                if path.exists("{0}/{1}.{2}".format(tempFolder,tempfilename,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,filename)):
-                    if duplicates == "rename":
-                       filename=tempfilename
-
- 
-                if hasattr(event.media, 'photo'):
-                   size = 0
-                else: 
-                   size=event.media.document.size
-
-                await log_reply(
-                    message,
-                    "Downloading file {0} ({1} bytes)".format(filename,size)
-                )
-
-                download_callback = lambda received, total: set_progress(filename, message, received, total)
-
-                await client.download_media(event.message, "{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), progress_callback = download_callback)
-                set_progress(filename, message, 100, 100)
-                move("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), "{0}/{1}".format(downloadFolder,filename))
-                await log_reply(message, "{0} ready".format(filename))
-
-                queue.task_done()
-            except Exception as e:
-                try: await log_reply(message, "Error: {}".format(str(e))) # If it failed, inform the user about it.
-                except: pass
-                print('Queue worker error: ', e)
- 
-    async def start():
-
-        tasks = []
-        loop = asyncio.get_event_loop()
-        for i in range(worker_count):
-            task = loop.create_task(worker())
-            tasks.append(task)
-        await sendHelloMessage(client, peerChannel)
-        await client.run_until_disconnected()
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-
-    client.loop.run_until_complete(start())

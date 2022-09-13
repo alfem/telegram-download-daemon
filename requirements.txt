@@ -4,4 +4,6 @@ pyaes==1.6.1
 pyasn1==0.4.8
 pycparser==2.20
 rsa==4.7
-Telethon>=1.24.0
+Telethon>=1.25.0
+pydantic==1.9.2
+sanitize_filename==1.2.0
