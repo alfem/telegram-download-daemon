@@ -132,6 +132,10 @@ class Daemon(ABC):
         manager: BaseChannelManager = BaseChannelManager(self.daemon_config)
         while True:
             print("Entro en el while true")
+            # If the queue has no messages left to be processed then clear the list to avoid huge memory consumption.
+            if self.queue.empty():
+                self.folder_list.clear()
+                
             element = await self.queue.get()
             folder_info: FolderContainer = element[2]
             try:
