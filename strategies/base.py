@@ -13,6 +13,7 @@ from telethon.tl.types import PeerChannel, DocumentAttributeFilename, DocumentAt
 from mimetypes import guess_extension
 
 from config.daemon_config import DaemonConfig
+from models.folder_container import FolderContainer
 from utils.event_utils import EventUtils
 
 
@@ -35,6 +36,7 @@ class BaseChannelManager(ABC):
                                        element: [], in_progress: Dict) -> telethon.tl.types.TypeMessage:
         event = element[0]
         message = element[1]
+        folder_info: FolderContainer = element[2]
         try:
             filename = self.utils.get_file_name(event)
             file_name, file_extension = os.path.splitext(filename)
@@ -51,11 +53,7 @@ class BaseChannelManager(ABC):
                 target_path: string = ""
                 try:
                     # If we are processing a picture, we create the target folder to hold the image and the audio files
-                    print(f"Message from the picture: {event.message.message}")
-                    self.folder_name = self.extract_folder_name(event.message.message)
-                    print(f"Folder name value: {self.folder_name}")
-                    target_path = os.path.join(self.daemon_config.dest, self.folder_name)
-                    print(f"Resolved target path: {target_path}")
+                    target_path = os.path.join(self.daemon_config.dest, folder_info.folder_name)
                     os.mkdir(target_path)
                 except FileExistsError as e:
                     print(f"Path {target_path} already exists, no problem.")
@@ -78,7 +76,7 @@ class BaseChannelManager(ABC):
                     self.daemon_config.temp_suffix), progress_callback=download_callback)
             await self.utils.set_progress(filename, message, 100, 100, in_progress)
             move("{0}/{1}.{2}".format(self.daemon_config.temp, filename, self.daemon_config.temp_suffix),
-                 "{0}/{1}".format(os.path.join(self.daemon_config.dest, self.folder_name), filename))
+                 "{0}/{1}".format(os.path.join(self.daemon_config.dest, folder_info.folder_name), filename))
             await self.utils.log_reply(message, "{0} ready".format(filename))
         except Exception as e:
             print(f"Error processing download logic", e)

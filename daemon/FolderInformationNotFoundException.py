@@ -1,0 +1,2 @@
+class FolderInformationNotFoundException(BaseException):
+    pass
