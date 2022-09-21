@@ -19,10 +19,10 @@ class ChannelStrategyFactory(ABC):
     def get_channel_manager(self, channel_id: int) -> BaseChannelManager:
         target_strategy: BaseChannelManager
         print(f"Input channel id to the factory: {channel_id}")
-        if channel_id == self.fresh_electronic_music_manager.managed_channel:
+        if channel_id in self.fresh_electronic_music_manager.managed_channel:
             print(f"Manager detected as FEM channel manager.")
             target_strategy = self.fresh_electronic_music_manager
-        elif channel_id == self.rave_music_releases_manager.managed_channel:
+        elif channel_id in self.rave_music_releases_manager.managed_channel:
             print(f"Manager detected as RMR channel manager.")
             target_strategy = self.rave_music_releases_manager
         else:

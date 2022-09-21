@@ -9,7 +9,8 @@ class RaveMusicReleasesChannelStrategy(BaseChannelManager):
 
     def __init__(self, daemon_config: DaemonConfig):
         super().__init__(daemon_config)
-        self._managed_channel = 1387836304
+        # 1387836304 also used by the same channel, wtf.
+        self._managed_channel: list[int] = [1286941266, 1387836304]
 
     def extract_folder_name(self, picture_message: string) -> string:
         print(f"Input message received: {picture_message}")
@@ -29,5 +30,5 @@ class RaveMusicReleasesChannelStrategy(BaseChannelManager):
         return sanitize(picture_message.splitlines()[index])
 
     @property
-    def managed_channel(self) -> int:
+    def managed_channel(self) -> list[int]:
         return self._managed_channel
