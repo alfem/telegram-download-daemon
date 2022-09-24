@@ -1,33 +1,42 @@
-from os import getenv, path
+import string
+from abc import ABC
+from os import path
+from pathlib import Path
+
 from telethon.sessions import StringSession
 
-TELEGRAM_DAEMON_SESSION_PATH = getenv("TELEGRAM_DAEMON_SESSION_PATH")
-sessionName = "DownloadDaemon"
-stringSessionFilename = "{0}.session".format(sessionName)
+from config.daemon_config import DaemonConfig
 
 
-def _getStringSessionIfExists():
-    sessionPath = path.join(TELEGRAM_DAEMON_SESSION_PATH,
-                            stringSessionFilename)
-    if path.isfile(sessionPath):
-        with open(sessionPath, 'r') as file:
-            session = file.read()
-            print("Session loaded from {0}".format(sessionPath))
-            return session
-    return None
+class TelegramSessionManager(ABC):
 
+    def __init__(self, daemon_config: DaemonConfig):
+        self.daemon_config = daemon_config
+        self.sessionName = "DownloadDaemon"
+        self.string_session_filename = "{0}.session".format(self.sessionName)
 
-def getSession():
-    if TELEGRAM_DAEMON_SESSION_PATH == None:
-        return sessionName
+    def _get_string_session_if_exists(self):
+        session_file_path = path.join(self.daemon_config.session_path,
+                                      self.string_session_filename)
+        if path.isfile(session_file_path):
+            with open(session_file_path, mode='r') as file:
+                session = file.read()
+                print("Session loaded from {0}".format(session_file_path))
+                return session
+        return None
 
-    return StringSession(_getStringSessionIfExists())
+    def get_session(self):
+        session_file_path: path = path.join(self.daemon_config.session_path,
+                                            self.string_session_filename)
+        if not path.exists(session_file_path) or not path.isfile(session_file_path):
+            return path.join(self.daemon_config.session_path, self.sessionName)
+        else:
+            return StringSession(self._get_string_session_if_exists())
 
-
-def saveSession(session):
-    if TELEGRAM_DAEMON_SESSION_PATH != None:
-        sessionPath = path.join(TELEGRAM_DAEMON_SESSION_PATH,
-                                stringSessionFilename)
-        with open(sessionPath, 'w') as file:
-            file.write(StringSession.save(session))
-        print("Session saved in {0}".format(sessionPath))
+    def save_session(self, session):
+        if self.daemon_config.session_path is not None:
+            session_file_path = path.join(self.daemon_config.session_path,
+                                          self.string_session_filename)
+            with open(session_file_path, mode='w') as file:
+                file.write(StringSession.save(session))
+            print("Session saved in {0}".format(session_file_path))

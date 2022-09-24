@@ -5,15 +5,13 @@ import string
 import subprocess
 from abc import ABC
 from os import path
-from typing import List
-
 from telethon import TelegramClient, __version__, events
 from telethon.tl.types import PeerChannel
 
 import utils
 from config.daemon_config import DaemonConfig
 from daemon.FolderInformationNotFoundException import FolderInformationNotFoundException
-from sessionManager import getSession, saveSession
+from sessionManager import TelegramSessionManager
 from strategies.base import BaseChannelManager
 from strategies.channel_strategy_factory import ChannelStrategyFactory
 from utils.event_utils import EventUtils
@@ -30,8 +28,9 @@ class Daemon(ABC):
 
     def __init__(self, config: DaemonConfig):
         self.daemon_config = config
-        self.peerChannel = PeerChannel(self.daemon_config.channel)
-        self.client = TelegramClient(getSession(), self.daemon_config.api_id, self.daemon_config.api_hash,
+        self.session_manager = TelegramSessionManager(config)
+        self.peer_channel = PeerChannel(self.daemon_config.channel)
+        self.client = TelegramClient(self.session_manager.get_session(), self.daemon_config.api_id, self.daemon_config.api_hash,
                                      proxy=None).start()
         self.channel_manager_factory: ChannelStrategyFactory = ChannelStrategyFactory(self.daemon_config)
         self.worker_count = multiprocessing.cpu_count()
@@ -44,12 +43,12 @@ class Daemon(ABC):
         await t_client.send_message(entity, "Hi! Ready for your files!")
 
     def init(self):
-        saveSession(self.client.session)
+        self.session_manager.save_session(self.client.session)
 
     @events.register(events.NewMessage())
     async def handler(self, event):
         folder_container: FolderContainer = None
-        if event.to_id != self.peerChannel:
+        if event.to_id != self.peer_channel:
             return
 
         try:
@@ -116,7 +115,7 @@ class Daemon(ABC):
             print('Events handler error: ', e)
 
     def get_right_folder_info(self, message_id: int) -> FolderContainer:
-        """ Gets closest message id to the one provided from the list, which contains right folder information to
+        """ Gets the closest message id to the one provided from the list, which contains right folder information to
         use. """
         target_folder_container: FolderContainer = None
         for info in reversed(self.folder_list):
@@ -162,7 +161,7 @@ class Daemon(ABC):
         for i in range(self.worker_count):
             task = loop.create_task(self.worker())
             tasks.append(task)
-        await self.send_hello_message(self.client, self.peerChannel)
+        await self.send_hello_message(self.client, self.peer_channel)
         await self.client.run_until_disconnected()
         for task in tasks:
             task.cancel()

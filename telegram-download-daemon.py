@@ -4,25 +4,12 @@
 # You need to install telethon (and cryptg to speed up downloads)
 
 import argparse
-import asyncio
 import logging
-import math
 import multiprocessing
-import os.path
-import subprocess
-import time
-from os import getenv, path
-from shutil import move
-
-from telethon import TelegramClient, events, __version__
-from telethon.tl.types import PeerChannel
+from os import getenv
 
 from config.daemon_config import DaemonConfig
 from daemon.telegram_daemon import Daemon
-from sessionManager import getSession, saveSession
-from strategies.base import BaseChannelManager
-from strategies.channel_strategy_factory import ChannelStrategyFactory
-from utils.event_utils import EventUtils
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s]%(name)s:%(message)s',
                     level=logging.WARNING)
@@ -116,7 +103,6 @@ if not tempFolder:
 # Edit these lines:
 proxy = None
 
-utils: EventUtils = EventUtils()
 daemon_config: DaemonConfig = DaemonConfig()
 daemon_config.set_api_id(api_id)
 daemon_config.set_api_hash(api_hash)
@@ -127,8 +113,6 @@ daemon_config.set_duplicates(duplicates)
 daemon_config.set_update_frequency(updateFrequency)
 daemon_config.set_last_update(lastUpdate)
 daemon_config.set_session_path(session_path)
-
-channel_manager_factory: ChannelStrategyFactory = ChannelStrategyFactory(daemon_config)
 
 telegram_daemon: Daemon = Daemon(daemon_config)
 telegram_daemon.run()
