@@ -22,7 +22,7 @@ class RaveMusicReleasesChannelStrategy(BaseChannelManager):
         index: int = 0
 
         if line1 is not None:
-            hashtags = [i for i in line1.split() if i.startswith("#")]
+            hashtags = [i for i in line1.split() if (i.startswith("#") or i.startswith("@"))]
 
         if len(line1.split()) == len(hashtags):
             index = 2
