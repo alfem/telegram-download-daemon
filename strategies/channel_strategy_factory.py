@@ -8,6 +8,7 @@ from strategies.exception.ChannelStrategyNotFoundException import ChannelStrateg
 from strategies.fresh_electronic_music_channel import FreshElectronicMusicChannelStrategy
 from strategies.prometeo_releases_music import PrometeoReleasesMusicChannelStrategy
 from strategies.rave_music_releases_channel import RaveMusicReleasesChannelStrategy
+from strategies.rave_station_channel import RaveStationChannelStrategy
 
 
 class ChannelStrategyFactory(ABC):
@@ -17,6 +18,7 @@ class ChannelStrategyFactory(ABC):
         self.rave_music_releases_manager: RaveMusicReleasesChannelStrategy = \
             RaveMusicReleasesChannelStrategy(daemon_config)
         self.prometeo_releases_music_manager : PrometeoReleasesMusicChannelStrategy = PrometeoReleasesMusicChannelStrategy(daemon_config)
+        self.rave_station_manager : RaveStationChannelStrategy = RaveStationChannelStrategy(daemon_config)
 
     def get_channel_manager(self, channel_id: int) -> BaseChannelManager:
         target_strategy: BaseChannelManager
@@ -27,9 +29,12 @@ class ChannelStrategyFactory(ABC):
         elif channel_id in self.rave_music_releases_manager.managed_channel:
             print(f"Manager detected as RMR channel manager.")
             target_strategy = self.rave_music_releases_manager
-        elif channel_id in self.prometeo_releases_music_manager.managed_channel():
+        elif channel_id in self.prometeo_releases_music_manager.managed_channel:
             print(f"Manager detected as PRM channel manager.")
             target_strategy = self.prometeo_releases_music_manager
+        elif channel_id in self.rave_station_manager.managed_channel:
+            print(f"Manager detected as RS channel manager.")
+            target_strategy = self.rave_station_manager
         else:
             print(f"Provided channel id not managed by any existing manager.")
             raise ChannelStrategyNotFoundException()
