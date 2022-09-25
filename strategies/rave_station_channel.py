@@ -13,7 +13,7 @@ class RaveStationChannelStrategy(BaseChannelManager):
 
     def extract_folder_name(self, picture_message: string) -> string:
         print(f"Input message received: {picture_message}")
-        index: int = 2
+        index: int = 1
 
         return sanitize(picture_message.splitlines()[index])
 
