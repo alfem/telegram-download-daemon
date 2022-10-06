@@ -21,9 +21,9 @@ class PrometeoReleasesMusicChannelStrategy(BaseChannelManager):
         index: int = 0
 
         if line1 is not None:
-            hashtags = [i for i in line1.split("-") if (i.startswith("#") or i.startswith("@"))]
+            hashtags = [i for i in line1.split("-") if (i.startswith("#") or i.startswith("@") or i.startswith(" @"))]
 
-        if len(line1.split()) == len(hashtags):
+        if len(line1.split("-")) == len(hashtags):
             index = 2
 
         return sanitize(picture_message.splitlines()[index])
