@@ -5,3 +5,4 @@ pyasn1==0.5.0
 pycparser==2.21
 rsa==4.9
 Telethon>=1.28.2
+humanize==4.6.0
