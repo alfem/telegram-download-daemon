@@ -9,6 +9,7 @@ import subprocess
 import math
 import time
 import random
+import re
 import string
 import os.path
 from mimetypes import guess_extension
@@ -204,23 +205,33 @@ with TelegramClient(getSession(), api_id, api_hash,
                     output = "Cleaning "+tempFolder+"\n"
                     output+=subprocess.run(["rm "+tempFolder+"/*."+TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout
                 else:
-                    output = "Available commands: list, status, clean"
+                    download_uri = re.search(r"https://t.me/c/(?P<channel_id>[0-9]+)/(?P<message_id>[0-9]+)", command)
+                    if download_uri:
+                        channel_msg = await client.get_messages(PeerChannel(int(download_uri['channel_id'])), 1,
+                                                            ids=int(download_uri['message_id']))
+                        await do_download(event, channel_msg)
+                        return
+                    else:
+                        output = "Send message link to download or use available commands: list, status, clean."
 
                 await log_reply(event, output)
 
-            if event.media:
-                if hasattr(event.media, 'document') or hasattr(event.media,'photo'):
-                    filename=getFilename(event)
-                    if ( path.exists("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,filename)) ) and duplicates == "ignore":
-                        message=await event.reply("{0} already exists. Ignoring it.".format(filename))
-                    else:
-                        message=await event.reply("{0} added to queue".format(filename))
-                        await queue.put([event, message])
-                else:
-                    message=await event.reply("That is not downloadable. Try to send it as a file.")
+            await do_download(event, event.message)
 
         except Exception as e:
                 print('Events handler error: ', e)
+
+    async def do_download(event, download_message=None):
+        if download_message.media:
+            if hasattr(download_message.media, 'document') or hasattr(download_message.media,'photo'):
+                filename=getFilename(download_message)
+                if ( path.exists("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX)) or path.exists("{0}/{1}".format(downloadFolder,filename)) ) and duplicates == "ignore":
+                    message=await event.reply("{0} already exists. Ignoring it.".format(filename))
+                else:
+                    message=await event.reply("{0} added to queue".format(filename))
+                    await queue.put([download_message, message])
+            else:
+                message=await event.reply("That is not downloadable. Try to send it as a file.")
 
     async def worker():
         while True:
@@ -250,7 +261,7 @@ with TelegramClient(getSession(), api_id, api_hash,
 
                 download_callback = lambda received, total: set_progress(filename, message, received, total)
 
-                await client.download_media(event.message, "{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), progress_callback = download_callback)
+                await client.download_media(event, "{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), progress_callback = download_callback)
                 set_progress(filename, message, 100, 100)
                 move("{0}/{1}.{2}".format(tempFolder,filename,TELEGRAM_DAEMON_TEMP_SUFFIX), "{0}/{1}".format(downloadFolder,filename))
                 await log_reply(message, "{0} ready".format(filename))
