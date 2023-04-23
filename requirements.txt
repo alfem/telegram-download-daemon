@@ -1,7 +1,7 @@
-cffi==1.14.0
-cryptg==0.3
+cffi==1.15.1
+cryptg==0.4
 pyaes==1.6.1
-pyasn1==0.4.8
-pycparser==2.20
-rsa==4.7
-Telethon>=1.24.0
+pyasn1==0.5.0
+pycparser==2.21
+rsa==4.9
+Telethon>=1.28.2
