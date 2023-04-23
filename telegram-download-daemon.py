@@ -135,11 +135,11 @@ def getFilename(event: events.NewMessage.Event):
               mediaFileName=attribute.file_name
               break     
             if isinstance(attribute, DocumentAttributeVideo):
-              if event.original_update.message.message != '': 
-                  mediaFileName = event.original_update.message.message
-              else:    
-                  mediaFileName = str(event.message.media.document.id)
-              mediaFileName+=guess_extension(event.message.media.document.mime_type)    
+              if event.message != '':
+                  mediaFileName = event.message.split(os.linesep)[0]
+              else:
+                  mediaFileName = str(event.media.document.id)
+              mediaFileName+=guess_extension(event.media.document.mime_type)
      
     mediaFileName="".join(c for c in mediaFileName if c.isalnum() or c in "()._- ")
       
