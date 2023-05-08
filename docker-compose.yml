@@ -10,6 +10,7 @@ services:
       TELEGRAM_DAEMON_CHANNEL: "YOUR CHANNEL ID HERE"
       TELEGRAM_DAEMON_DEST: "/downloads"
       TELEGRAM_DAEMON_SESSION_PATH: "/session"
+      #TELEGRAM_DAEMON_SIMULTANEUS: 2
     volumes:
        - downloads:/downloads
        - sessions:/session

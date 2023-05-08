@@ -41,6 +41,13 @@ TELEGRAM_DAEMON_DUPLICATES=getenv("TELEGRAM_DAEMON_DUPLICATES", "rename")
 
 TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
+TELEGRAM_DAEMON_SIMULTANEUS=getenv("TELEGRAM_DAEMON_SIMULTANEUS", "multiprocessing.cpu_count()")
+
+if TELEGRAM_DAEMON_SIMULTANEUS == "multiprocessing.cpu_count()":
+    simultaneous_type = str
+else:
+    simultaneous_type = int
+
 parser = argparse.ArgumentParser(
     description="Script to download files from a Telegram Channel.")
 parser.add_argument(
@@ -87,6 +94,13 @@ parser.add_argument(
     help=
     '"ignore"=do not download duplicated files, "rename"=add a random suffix, "overwrite"=redownload and overwrite.'
 )
+parser.add_argument(
+    "--simultaneus",
+    type=simultaneous_type,
+    default=TELEGRAM_DAEMON_SIMULTANEUS,
+    help=
+    'number of simultaneous downloads'
+)
 args = parser.parse_args()
 
 api_id = args.api_id
@@ -95,7 +109,7 @@ channel_id = args.channel
 downloadFolder = args.dest
 tempFolder = args.temp
 duplicates=args.duplicates
-worker_count = multiprocessing.cpu_count()
+worker_count = args.simultaneus
 updateFrequency = 10
 lastUpdate = 0
 #multiprocessing.Value('f', 0)
