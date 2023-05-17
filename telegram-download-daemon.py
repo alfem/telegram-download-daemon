@@ -41,12 +41,7 @@ TELEGRAM_DAEMON_DUPLICATES=getenv("TELEGRAM_DAEMON_DUPLICATES", "rename")
 
 TELEGRAM_DAEMON_TEMP_SUFFIX="tdd"
 
-TELEGRAM_DAEMON_SIMULTANEUS=getenv("TELEGRAM_DAEMON_SIMULTANEUS", "multiprocessing.cpu_count()")
-
-if TELEGRAM_DAEMON_SIMULTANEUS == "multiprocessing.cpu_count()":
-    simultaneous_type = str
-else:
-    simultaneous_type = int
+TELEGRAM_DAEMON_SIMULTANEUS=getenv("TELEGRAM_DAEMON_SIMULTANEUS", multiprocessing.cpu_count())
 
 parser = argparse.ArgumentParser(
     description="Script to download files from a Telegram Channel.")
@@ -96,7 +91,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--simultaneus",
-    type=simultaneous_type,
+    type=int,
     default=TELEGRAM_DAEMON_SIMULTANEUS,
     help=
     'number of simultaneous downloads'
@@ -112,11 +107,10 @@ duplicates=args.duplicates
 worker_count = args.simultaneus
 updateFrequency = 10
 lastUpdate = 0
-#multiprocessing.Value('f', 0)
 
 if not tempFolder:
     tempFolder = downloadFolder
-
+   
 # Edit these lines:
 proxy = None
 
@@ -125,6 +119,7 @@ proxy = None
 async def sendHelloMessage(client, peerChannel):
     entity = await client.get_entity(peerChannel)
     print("Telegram Download Daemon "+TDD_VERSION+" using Telethon "+__version__)
+    print("  Simultaneous downloads:"+str(worker_count))
     await client.send_message(entity, "Telegram Download Daemon "+TDD_VERSION+" using Telethon "+__version__)
     await client.send_message(entity, "Hi! Ready for your files!")
  
