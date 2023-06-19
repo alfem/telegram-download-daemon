@@ -212,7 +212,7 @@ with TelegramClient(getSession(), api_id, api_hash,
                 elif command == "clean":
                     output = "Cleaning "+tempFolder+"\n"
                     output+=subprocess.run(["rm "+tempFolder+"/*."+TELEGRAM_DAEMON_TEMP_SUFFIX], shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout
-                elif command == "status":
+                elif command == "queue":
                     try:
                         files_in_queue = []
                         for q in queue.__dict__['_queue']:
