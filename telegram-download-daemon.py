@@ -216,7 +216,7 @@ with TelegramClient(getSession(), api_id, api_hash,
                     try:
                         files_in_queue = []
                         for q in queue.__dict__['_queue']:
-                            files_in_queue.put(getFilename(q[0]))
+                            files_in_queue.append(getFilename(q[0]))
                         output = "".join([ "{0}\n".format(filename) for (filename) in files_in_queue])
                         if output: 
                             output = "Files in queue:\n\n" + output
