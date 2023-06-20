@@ -51,6 +51,8 @@ You can also 'talk' to this daemon using your Telegram client:
 * Say "list" and get a list of available files in the destination path.
 * Say "status" to the daemon to check the current status.
 * Say "clean" to remove stale (*.tdd) files from temporary directory.
+* Say "queue" to list the pending files waiting to startf.
+
 
 
 # Docker
